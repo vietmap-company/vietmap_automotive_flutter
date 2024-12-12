@@ -4,14 +4,15 @@ This is a Flutter plugin for the [Vietmap Automotive SDK](https://maps.vietmap.v
 
 ## Getting Started
 
-1. Add the plugin to your `pubspec.yaml` file. Replace `VIETMAP_AUTOMOTIVE_FLUTTER_VERSION` with the latest version of the plugin.:
+1. Add the plugin to your `pubspec.yaml` file. 
 
 ```yaml
 dependencies:
   vietmap_automotive_flutter: ^0.0.2
 ```
 
-2. Import Android auto module to your `setting.gradle` file:
+2. Import Android auto module to bottom of your `setting.gradle` file (top level function).
+Replace `VIETMAP_AUTOMOTIVE_FLUTTER_VERSION` with the latest version of the plugin.:
 ```gradle
 
 def relativePath = ""
