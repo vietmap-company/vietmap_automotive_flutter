@@ -68,3 +68,8 @@ android {
         }
     }
 }
+dependencies {
+    implementation project(':androidauto')
+
+    implementation("androidx.car.app:app:1.4.0")
+}

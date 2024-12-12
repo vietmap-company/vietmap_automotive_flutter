@@ -8,7 +8,8 @@ abstract class VietmapAutomotiveFlutterPlatform extends PlatformInterface {
 
   static final Object _token = Object();
 
-  static VietmapAutomotiveFlutterPlatform _instance = MethodChannelVietmapAutomotiveFlutter();
+  static VietmapAutomotiveFlutterPlatform _instance =
+      MethodChannelVietmapAutomotiveFlutter();
 
   /// The default instance of [VietmapAutomotiveFlutterPlatform] to use.
   ///
@@ -25,5 +26,9 @@ abstract class VietmapAutomotiveFlutterPlatform extends PlatformInterface {
 
   Future<String?> getPlatformVersion() {
     throw UnimplementedError('platformVersion() has not been implemented.');
+  }
+
+  Future<String?> initAutomotive({required String styleUrl, required String vietMapAPIKey}) {
+    throw UnimplementedError('initAutomotive() has not been implemented.');
   }
 }

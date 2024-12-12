@@ -7,21 +7,31 @@ import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 class MockVietmapAutomotiveFlutterPlatform
     with MockPlatformInterfaceMixin
     implements VietmapAutomotiveFlutterPlatform {
-
   @override
   Future<String?> getPlatformVersion() => Future.value('42');
+
+  @override
+  Future<String?> initAutomotive(
+      {required String styleUrl, required String vietMapAPIKey}) {
+    // TODO: implement initAutomotive
+    throw UnimplementedError();
+  }
 }
 
 void main() {
-  final VietmapAutomotiveFlutterPlatform initialPlatform = VietmapAutomotiveFlutterPlatform.instance;
+  final VietmapAutomotiveFlutterPlatform initialPlatform =
+      VietmapAutomotiveFlutterPlatform.instance;
 
   test('$MethodChannelVietmapAutomotiveFlutter is the default instance', () {
-    expect(initialPlatform, isInstanceOf<MethodChannelVietmapAutomotiveFlutter>());
+    expect(
+        initialPlatform, isInstanceOf<MethodChannelVietmapAutomotiveFlutter>());
   });
 
   test('getPlatformVersion', () async {
-    VietmapAutomotiveFlutter vietmapAutomotiveFlutterPlugin = VietmapAutomotiveFlutter();
-    MockVietmapAutomotiveFlutterPlatform fakePlatform = MockVietmapAutomotiveFlutterPlatform();
+    VietmapAutomotiveFlutter vietmapAutomotiveFlutterPlugin =
+        VietmapAutomotiveFlutter();
+    MockVietmapAutomotiveFlutterPlatform fakePlatform =
+        MockVietmapAutomotiveFlutterPlatform();
     VietmapAutomotiveFlutterPlatform.instance = fakePlatform;
 
     expect(await vietmapAutomotiveFlutterPlugin.getPlatformVersion(), '42');

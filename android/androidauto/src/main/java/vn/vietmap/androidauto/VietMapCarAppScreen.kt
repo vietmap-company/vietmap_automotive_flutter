@@ -19,7 +19,7 @@ import vn.vietmap.vietmapsdk.maps.VietMapGL
 
 class VietMapCarAppScreen(
     carContext: CarContext,
-    private val mSurfaceRenderer: VietMapAndroidAutoSurface,
+      val mSurfaceRenderer: VietMapAndroidAutoSurface,
 ) : Screen(carContext) {
 
     private var vietmapGL: VietMapGL? = null
@@ -27,15 +27,39 @@ class VietMapCarAppScreen(
     private val mSurfaceCallback: SurfaceCallback = object : SurfaceCallback {
         // Handle surface callback event here
     }
+    companion object{
+        private var instance: VietMapCarAppScreen? = null
+        fun createInstance(carContext: CarContext, mNavigationCarSurface: VietMapAndroidAutoSurface): VietMapCarAppScreen {
+            if (instance == null) {
+                instance = VietMapCarAppScreen(carContext, mNavigationCarSurface)
+            }
+            return instance!!
+        }
+        fun getInstance(): VietMapCarAppScreen? {
+            return instance
+        }
+    }
+
     init {
-        mSurfaceRenderer.addOnSurfaceCallbackListener(mSurfaceCallback)
+//        mSurfaceRenderer.addOnSurfaceCallbackListener(mSurfaceCallback)
         mSurfaceRenderer.init(
-            Style.Builder()
-                .fromUri("https://maps.vietmap.vn/api/maps/light/styles.json?apikey=YOUR_API_KEY_HERE"),
+            Style.Builder(),
             OnMapReadyCallback {
                 vietmapGL = it
             }
         )
+    }
+    fun init(  styleUrl: String) {
+        mSurfaceRenderer.addOnSurfaceCallbackListener(mSurfaceCallback)
+        mSurfaceRenderer.init(
+            Style.Builder()
+                .fromUri(styleUrl),
+            OnMapReadyCallback {
+                vietmapGL = it
+                invalidate()
+            }
+        )
+        invalidate()
     }
 
     override fun onGetTemplate(): Template {

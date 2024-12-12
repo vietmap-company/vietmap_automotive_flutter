@@ -5,11 +5,13 @@ import 'package:vietmap_automotive_flutter/vietmap_automotive_flutter_method_cha
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  MethodChannelVietmapAutomotiveFlutter platform = MethodChannelVietmapAutomotiveFlutter();
+  MethodChannelVietmapAutomotiveFlutter platform =
+      MethodChannelVietmapAutomotiveFlutter();
   const MethodChannel channel = MethodChannel('vietmap_automotive_flutter');
 
   setUp(() {
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
       channel,
       (MethodCall methodCall) async {
         return '42';
@@ -18,7 +20,8 @@ void main() {
   });
 
   tearDown(() {
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(channel, null);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, null);
   });
 
   test('getPlatformVersion', () async {

@@ -32,7 +32,8 @@ class _MyAppState extends State<MyApp> {
     // We also handle the message potentially returning null.
     try {
       platformVersion =
-          await _vietmapAutomotiveFlutterPlugin.getPlatformVersion() ?? 'Unknown platform version';
+          await _vietmapAutomotiveFlutterPlugin.getPlatformVersion() ??
+              'Unknown platform version';
     } on PlatformException {
       platformVersion = 'Failed to get platform version.';
     }
@@ -56,6 +57,26 @@ class _MyAppState extends State<MyApp> {
         ),
         body: Center(
           child: Text('Running on: $_platformVersion\n'),
+        ),
+        floatingActionButton: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            FloatingActionButton(
+              onPressed: () {
+                initPlatformState();
+              },
+              child: Icon(Icons.refresh),
+            ),
+            FloatingActionButton(
+              onPressed: () {
+                _vietmapAutomotiveFlutterPlugin.initAutomotive(
+                    styleUrl:
+                        'https://maps.vietmap.vn/api/maps/light/styles.json?apikey=YOUR_API_KEY_HERE',
+                    vietMapAPIKey: 'YOUR_API_KEY_HERE');
+              },
+              child: Icon(Icons.map),
+            )
+          ],
         ),
       ),
     );
