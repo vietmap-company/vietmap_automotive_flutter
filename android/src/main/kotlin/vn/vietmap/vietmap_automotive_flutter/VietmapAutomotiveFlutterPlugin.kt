@@ -1,51 +1,126 @@
 package vn.vietmap.vietmap_automotive_flutter
 
 import android.util.Log
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.MediatorLiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ProcessLifecycleOwner
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import vn.vietmap.androidauto.VietMapCarAppScreen
-class VietmapAutomotiveFlutterPlugin: FlutterPlugin, MethodCallHandler {
-  private lateinit var channel : MethodChannel
-  var vietmapCarApp : VietMapCarAppScreen? = null
-  var styleUrl: String = ""
-  var apiKey: String = ""
-  override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
+import vn.vietmap.androidauto.events.VietmapAutomotiveEvent
 
-    channel = MethodChannel(flutterPluginBinding.binaryMessenger, "vietmap_automotive_flutter")
-    channel.setMethodCallHandler(this)
-  }
+class VietmapAutomotiveFlutterPlugin: FlutterPlugin, MethodCallHandler, LifecycleObserver, LifecycleOwner {
+    private lateinit var channel : MethodChannel
+    var vietmapCarApp : VietMapCarAppScreen? = null
+    private val styleUrl: MutableLiveData<String> = MutableLiveData("")
+    private val apiKey: MutableLiveData<String> = MutableLiveData("")
+    private val resourcesLiveData: MediatorLiveData<Pair<String, String>> = MediatorLiveData()
+    override val lifecycle: Lifecycle
+        get() = ProcessLifecycleOwner.get().lifecycle
 
-  override fun onMethodCall(call: MethodCall, result: Result) {
-    if(!isConnectedToAndroidAuto(result)) return
 
-    if (call.method == "getPlatformVersion") {
-      result.success("Android ${android.os.Build.VERSION.RELEASE}")
+    init {
+        resourcesLiveData.apply {
+            addSource(styleUrl) { styleUrlString ->
+                value = Pair(styleUrlString , apiKey.value ?: "")
+            }
+            addSource(apiKey) { apiKeyString ->
+                value = Pair(styleUrl.value ?: "", apiKeyString)
+            }
+        }
+        observeLiveData()
     }
-    if (call.method == "initAutomotive") {
-      val data = call.arguments as Map<*, *>
-      apiKey = data["vietMapAPIKey"] as String
-      styleUrl = data["styleUrl"] as String
-      vietmapCarApp?.init(styleUrl)
-      result.success("car_app_initialized")
-    }
-    else {
-      result.notImplemented()
-    }
-  }
 
-  private fun isConnectedToAndroidAuto(result: Result): Boolean {
-    val carApp = VietMapCarAppScreen.getInstance()
-    vietmapCarApp = carApp
-    if(vietmapCarApp == null){
-      result.success("android_auto_disconnected")
+    override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
+        channel = MethodChannel(flutterPluginBinding.binaryMessenger, "vietmap_automotive_flutter")
+        channel.setMethodCallHandler(this)
+        lifecycle.addObserver(this)
     }
-    return vietmapCarApp != null
-  }
 
-  override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
-    channel.setMethodCallHandler(null)
-  }
+    override fun onMethodCall(call: MethodCall, result: Result) {
+        if(!isConnectedToAndroidAuto(result)) return
+
+        when (call.method) {
+            VietmapAutomotiveEvent.GET_PLATFORM_VERSION.nameValue -> {
+              result.success("Android ${android.os.Build.VERSION.RELEASE}")
+            }
+            VietmapAutomotiveEvent.INIT_AUTOMOTIVE.nameValue -> {
+              val data = call.arguments as Map<*, *>
+              apiKey.postValue(data["vietMapAPIKey"] as String)
+              styleUrl.postValue(data["styleUrl"] as String)
+              result.success("car_app_initialized")
+            }
+            VietmapAutomotiveEvent.ADD_MARKERS.nameValue -> {
+                val listMarkerIds = vietmapCarApp?.addMarker(call.arguments as List<Map<String, Any>>)
+                result.success(listMarkerIds)
+            }
+            VietmapAutomotiveEvent.REMOVE_MARKER.nameValue -> {
+                val data = call.arguments as Map<String, Any>
+                val isRemoved = vietmapCarApp?.removeMarker(data) ?: false
+                result.success(isRemoved)
+            }
+            VietmapAutomotiveEvent.REMOVE_ALL_MARKERS.nameValue -> {
+                val isRemoved = vietmapCarApp?.removeAllMarkers() ?: false
+                result.success(isRemoved)
+            }
+            VietmapAutomotiveEvent.ADD_POLYLINES.nameValue -> {
+                val data = call.arguments as Map<String, Any>
+                val listPolylineIds = vietmapCarApp?.addPolylines(data)
+                result.success(listPolylineIds)
+            }
+            VietmapAutomotiveEvent.REMOVE_POLYLINE.nameValue -> {
+                val data = call.arguments as Map<String, Any>
+                val isRemoved = vietmapCarApp?.removePolyline(data) ?: false
+                result.success(isRemoved)
+            }
+            VietmapAutomotiveEvent.REMOVE_ALL_POLYLINES.nameValue -> {
+                val isRemoved = vietmapCarApp?.removeAllPolylines() ?: false
+                result.success(isRemoved)
+            }
+            VietmapAutomotiveEvent.ADD_POLYGONS.nameValue -> {
+                val data = call.arguments as Map<String, Any>
+                val listPolygonIds = vietmapCarApp?.addPolygons(data)
+                result.success(listPolygonIds)
+            }
+            VietmapAutomotiveEvent.REMOVE_ALL_POLYGONS.nameValue -> {
+                val isRemoved = vietmapCarApp?.removeAllPolygons() ?: false
+                result.success(isRemoved)
+            }
+            VietmapAutomotiveEvent.REMOVE_POLYGON.nameValue -> {
+                val data = call.arguments as Map<String, Any>
+                val isRemoved = vietmapCarApp?.removePolygon(data) ?: false
+                result.success(isRemoved)
+            }
+            else -> {
+              result.notImplemented()
+            }
+        }
+    }
+
+    private fun isConnectedToAndroidAuto(result: Result): Boolean {
+        val carApp = VietMapCarAppScreen.getInstance()
+        vietmapCarApp = carApp
+        if(vietmapCarApp == null){
+          result.success("android_auto_disconnected")
+        }
+        return vietmapCarApp != null
+    }
+
+    override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+        channel.setMethodCallHandler(null)
+    }
+
+    private fun observeLiveData(){
+        resourcesLiveData.observe(this) { pair ->
+            if(pair.first.isNotEmpty() && pair.second.isNotEmpty()){
+                vietmapCarApp?.init(pair.first, pair.second)
+            }
+        }
+    }
 }
