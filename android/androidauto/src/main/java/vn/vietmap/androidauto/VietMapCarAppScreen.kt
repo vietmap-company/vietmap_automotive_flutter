@@ -45,18 +45,6 @@ class VietMapCarAppScreen(
     private val mSurfaceCallback: SurfaceCallback = object : SurfaceCallback {
         // Handle surface callback event here
     }
-    companion object{
-        private var instance: VietMapCarAppScreen? = null
-        fun createInstance(carContext: CarContext, mNavigationCarSurface: VietMapAndroidAutoSurface): VietMapCarAppScreen {
-            if (instance == null) {
-                instance = VietMapCarAppScreen(carContext, mNavigationCarSurface)
-            }
-            return instance!!
-        }
-        fun getInstance(): VietMapCarAppScreen? {
-            return instance
-        }
-    }
 
     init {
 //        mSurfaceRenderer.addOnSurfaceCallbackListener(mSurfaceCallback)
