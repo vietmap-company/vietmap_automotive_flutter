@@ -12,4 +12,8 @@ enum class VietmapAutomotiveEvent(val nameValue: String) {
     ADD_POLYGONS("addPolygons"),
     REMOVE_POLYGON("removePolygon"),
     REMOVE_ALL_POLYGONS("removeAllPolygons"),
+    ON_MAP_CLICK("onMapClick"),
+    ON_MAP_STYLE_LOADED("onStyleLoaded"),
+    ON_MAP_RENDERED("onMapRendered"),
+    ON_MAP_READY("onMapReady"),
 }

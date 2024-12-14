@@ -1,12 +1,14 @@
 package vn.vietmap.androidauto
 
+import android.Manifest.permission.ACCESS_COARSE_LOCATION
+import android.Manifest.permission.ACCESS_FINE_LOCATION
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
-import android.util.Log
+import android.graphics.PointF
 import androidx.car.app.CarContext
 import androidx.car.app.Screen
-import androidx.car.app.ScreenManager
 import androidx.car.app.SurfaceCallback
 import androidx.car.app.model.Action
 import androidx.car.app.model.ActionStrip
@@ -14,8 +16,13 @@ import androidx.car.app.model.CarColor
 import androidx.car.app.model.CarIcon
 import androidx.car.app.model.Template
 import androidx.car.app.navigation.model.NavigationTemplate
+import androidx.core.app.ActivityCompat
 import androidx.core.graphics.drawable.IconCompat
 import okhttp3.internal.toHexString
+import vn.vietmap.androidauto.communicate_interface.IAutomotiveCommunicator
+import vn.vietmap.androidauto.controller_interface.IMapController
+import vn.vietmap.androidauto.models.CurrentCenterPoint
+import vn.vietmap.services.android.navigation.v5.location.engine.LocationEngineProvider
 import vn.vietmap.vietmapandroidautosdk.map.VietMapAndroidAutoSurface
 import vn.vietmap.vietmapsdk.R
 import vn.vietmap.vietmapsdk.annotations.IconFactory
@@ -25,50 +32,74 @@ import vn.vietmap.vietmapsdk.annotations.Polygon
 import vn.vietmap.vietmapsdk.annotations.PolygonOptions
 import vn.vietmap.vietmapsdk.annotations.Polyline
 import vn.vietmap.vietmapsdk.annotations.PolylineOptions
+import vn.vietmap.vietmapsdk.camera.CameraPosition
+import vn.vietmap.vietmapsdk.camera.CameraUpdateFactory
 import vn.vietmap.vietmapsdk.geometry.LatLng
-import vn.vietmap.vietmapsdk.maps.OnMapReadyCallback
+import vn.vietmap.vietmapsdk.location.LocationComponent
+import vn.vietmap.vietmapsdk.location.LocationComponentActivationOptions
+import vn.vietmap.vietmapsdk.location.LocationComponentOptions
+import vn.vietmap.vietmapsdk.location.engine.LocationEngine
+import vn.vietmap.vietmapsdk.location.modes.CameraMode
+import vn.vietmap.vietmapsdk.location.modes.RenderMode
+import vn.vietmap.vietmapsdk.maps.MapView
 import vn.vietmap.vietmapsdk.maps.Style
 import vn.vietmap.vietmapsdk.maps.VietMapGL
 
 class VietMapCarAppScreen(
     carContext: CarContext,
       val mSurfaceRenderer: VietMapAndroidAutoSurface,
-) : Screen(carContext) {
+) : Screen(carContext), IMapController {
 
     private var vietmapGL: VietMapGL? = null
+    private var mapView: MapView? = null
     private var apikey: String? = null
+    private var locationEngine: LocationEngine? = null
+    private var locationComponent: LocationComponent? = null
 
     private val listMarkers: ArrayList<Marker> = ArrayList()
     private val listPolylines: ArrayList<Polyline> = ArrayList()
     private val listPolygons: ArrayList<Polygon> = ArrayList()
+    private var currentCenterPoint: CurrentCenterPoint? = null
+    private var zoom = 20.0
+    private var tilt = 0.0
+    private lateinit var automotiveCommunicator: IAutomotiveCommunicator
 
     private val mSurfaceCallback: SurfaceCallback = object : SurfaceCallback {
         // Handle surface callback event here
+        override fun onClick(x: Float, y: Float) {
+            val clickedLatLng = vietmapGL?.projection?.fromScreenLocation(PointF(x, y))
+            clickedLatLng?.let {
+                automotiveCommunicator.onMapClick(it.latitude, it.longitude)
+            }
+        }
     }
 
-    init {
-//        mSurfaceRenderer.addOnSurfaceCallbackListener(mSurfaceCallback)
-        mSurfaceRenderer.init(
-            Style.Builder(),
-            OnMapReadyCallback {
-                vietmapGL = it
-            }
-        )
+    fun setAutomotiveCommunicator(automotiveCommunicator: IAutomotiveCommunicator) {
+        this.automotiveCommunicator = automotiveCommunicator
     }
+
     fun init(styleUrl: String, apiKey: String) {
         this.apikey = apiKey
+
         mSurfaceRenderer.addOnSurfaceCallbackListener(mSurfaceCallback)
         mSurfaceRenderer.init(
             Style.Builder()
                 .fromUri(styleUrl),
             {
-                Log.d("VietMapCarAppScreen", "Style loaded")
+                locationEngine = LocationEngineProvider.getBestLocationEngine(carContext)
+                enableLocationComponent(it)
+                automotiveCommunicator.onStyleLoaded()
             },
             {
+                automotiveCommunicator.onMapReady()
                 vietmapGL = it
                 invalidate()
             }
         )
+        mapView = mSurfaceRenderer.getMapView()
+        mapView?.addOnDidFinishRenderingMapListener {
+            isFinished -> if (isFinished) automotiveCommunicator.onMapRendered()
+        }
         invalidate()
     }
 
@@ -89,9 +120,7 @@ class VietMapCarAppScreen(
                         )
                     ).build()
                 ).setOnClickListener {
-                    val screenManager: ScreenManager =
-                        carContext.getCarService(ScreenManager::class.java)
-                    screenManager.pop()
+                    recenter()
                 }
                 .build()
         )
@@ -124,7 +153,7 @@ class VietMapCarAppScreen(
                                 .build()
                         )
                         .setOnClickListener {
-                            //TODO: Add your code here
+                            zoomIn()
                         }
                         .build())
                 .addAction(
@@ -139,7 +168,7 @@ class VietMapCarAppScreen(
                                 .build()
                         )
                         .setOnClickListener {
-                            //TODO: Add your code here
+                            zoomOut()
                         }
                         .build())
                 .build())
@@ -396,5 +425,82 @@ class VietMapCarAppScreen(
             e.printStackTrace()
             return false
         }
+    }
+
+    override fun zoomIn() {
+        vietmapGL?.animateCamera(CameraUpdateFactory.zoomIn())
+    }
+
+    override fun zoomOut() {
+        vietmapGL?.animateCamera(CameraUpdateFactory.zoomOut())
+    }
+
+    override fun recenter() {
+        if(currentCenterPoint != null) {
+            moveCamera(
+                LatLng(currentCenterPoint!!.latitude, currentCenterPoint!!.longitude),
+                currentCenterPoint!!.bearing
+            )
+        }
+        else{
+            vietmapGL?.locationComponent?.lastKnownLocation?.let {
+                moveCamera(
+                    LatLng(it.latitude, it.longitude),
+                    it.bearing
+                )
+            }
+        }
+    }
+
+    private fun moveCamera(location: LatLng, bearing: Float?) {
+        val cameraPosition = CameraPosition.Builder().target(location).zoom(zoom).tilt(tilt)
+
+        if (bearing != null) {
+            cameraPosition.bearing(bearing.toDouble())
+        }
+
+        val duration = 1000
+        vietmapGL?.easeCamera(
+            CameraUpdateFactory.newCameraPosition(cameraPosition.build()), duration
+        )
+    }
+
+    private fun enableLocationComponent(loadedMapStyle: Style) {
+        locationComponent = vietmapGL?.locationComponent
+        if (locationComponent != null) {
+            locationComponent!!.activateLocationComponent(
+                LocationComponentActivationOptions.builder(
+                    carContext, loadedMapStyle
+                ).locationComponentOptions(
+                    LocationComponentOptions.builder(carContext)
+                        .pulseEnabled(true)
+                        .maxZoomIconScale(2.5f)
+                        .minZoomIconScale(2.0f)
+                        .build()
+                ).build()
+            )
+            if (!checkPermission()) {
+                return
+            }
+            locationComponent!!.setCameraMode(
+                CameraMode.TRACKING_GPS_NORTH, 750L,
+                zoom,
+                locationComponent!!.lastKnownLocation?.bearing?.toDouble() ?: 0.0,
+                tilt,
+                null
+            )
+            locationComponent!!.isLocationComponentEnabled = true
+            locationComponent!!.zoomWhileTracking(19.0)
+            locationComponent!!.renderMode = RenderMode.GPS
+            locationComponent!!.locationEngine = locationEngine
+        }
+    }
+
+    private fun checkPermission(): Boolean {
+        return ActivityCompat.checkSelfPermission(
+            carContext, ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(
+            carContext, ACCESS_COARSE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
     }
 }

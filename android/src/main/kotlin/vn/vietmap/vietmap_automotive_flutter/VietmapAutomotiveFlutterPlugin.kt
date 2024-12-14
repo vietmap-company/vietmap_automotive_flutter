@@ -13,9 +13,9 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
-import kotlinx.coroutines.launch
 import vn.vietmap.androidauto.VietMapCarAppScreen
 import vn.vietmap.androidauto.VietMapCarAppSession
+import vn.vietmap.androidauto.communicate_interface.IAutomotiveCommunicator
 import vn.vietmap.androidauto.events.VietmapAutomotiveEvent
 
 class VietmapAutomotiveFlutterPlugin: FlutterPlugin, MethodCallHandler, LifecycleObserver, LifecycleOwner {
@@ -28,6 +28,24 @@ class VietmapAutomotiveFlutterPlugin: FlutterPlugin, MethodCallHandler, Lifecycl
     override val lifecycle: Lifecycle
         get() = ProcessLifecycleOwner.get().lifecycle
 
+    private val automotiveCommunicator = object : IAutomotiveCommunicator {
+        override fun onStyleLoaded() {
+            channel.invokeMethod(VietmapAutomotiveEvent.ON_MAP_STYLE_LOADED.nameValue, null)
+        }
+
+        override fun onMapRendered() {
+            channel.invokeMethod(VietmapAutomotiveEvent.ON_MAP_RENDERED.nameValue, null)
+        }
+
+        override fun onMapReady() {
+            channel.invokeMethod(VietmapAutomotiveEvent.ON_MAP_READY.nameValue, null)
+        }
+
+        override fun onMapClick(lat: Double, lng: Double) {
+            channel.invokeMethod(VietmapAutomotiveEvent.ON_MAP_CLICK.nameValue, mapOf("lat" to lat, "lng" to lng))
+        }
+    }
+
 
     init {
         resourcesLiveData.apply {
@@ -38,22 +56,24 @@ class VietmapAutomotiveFlutterPlugin: FlutterPlugin, MethodCallHandler, Lifecycl
                 value = Pair(styleUrl.value ?: "", apiKeyString)
             }
         }
-        VietMapCarAppSession.carAppScreenInstance.observe(this) { screen ->
-            if(screen == null) return@observe
-            vietmapCarApp = screen
-            isConnectToAndroidAuto = true
-
-            if(styleUrl.value!!.isNotEmpty() && apiKey.value!!.isNotEmpty()){
-                vietmapCarApp?.init(styleUrl.value!!, apiKey.value!!)
-            }
-        }
-        observeLiveData()
     }
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "vietmap_automotive_flutter")
         channel.setMethodCallHandler(this)
         lifecycle.addObserver(this)
+        VietMapCarAppSession.carAppScreenInstance.observe(this) { screen ->
+            if(screen == null) return@observe
+            vietmapCarApp = screen
+            vietmapCarApp?.setAutomotiveCommunicator(automotiveCommunicator)
+            isConnectToAndroidAuto = true
+        }
+        resourcesLiveData.observe(this) { pair ->
+            if(pair.first.isNotEmpty() && pair.second.isNotEmpty() && vietmapCarApp != null){
+                Log.d("VietmapAutomotive", "Init Vietmap Car App")
+                vietmapCarApp?.init(pair.first, pair.second)
+            }
+        }
     }
 
     override fun onMethodCall(call: MethodCall, result: Result) {
@@ -121,14 +141,5 @@ class VietmapAutomotiveFlutterPlugin: FlutterPlugin, MethodCallHandler, Lifecycl
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         channel.setMethodCallHandler(null)
-    }
-
-    private fun observeLiveData(){
-        resourcesLiveData.observe(this) { pair ->
-            if(pair.first.isNotEmpty() && pair.second.isNotEmpty() && vietmapCarApp != null){
-                Log.d("VietmapAutomotive", "Init Vietmap Car App")
-                vietmapCarApp?.init(pair.first, pair.second)
-            }
-        }
     }
 }
