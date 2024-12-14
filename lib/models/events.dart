@@ -12,4 +12,8 @@ class Events {
   static const String addPolygons = 'addPolygons';
   static const String removePolygon = 'removePolygon';
   static const String removeAllPolygons = 'removeAllPolygons';
+  static const String onMapClick = 'onMapClick';
+  static const String onStyleLoaded = 'onStyleLoaded';
+  static const String onMapRendered = 'onMapRendered';
+  static const String onMapReady = 'onMapReady';
 }

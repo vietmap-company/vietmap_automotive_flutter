@@ -16,6 +16,37 @@ class MethodChannelVietmapAutomotiveFlutter
   @visibleForTesting
   final methodChannel = const MethodChannel('vietmap_automotive_flutter');
 
+  MethodChannelVietmapAutomotiveFlutter();
+
+  @override
+  void init({
+    void Function()? onMapReady,
+    void Function(double latitude, double longitude)? onMapClick,
+    void Function()? onMapRendered,
+    void Function()? onStyleLoaded,
+  }) {
+    methodChannel.setMethodCallHandler((call) async {
+      switch (call.method) {
+        case Events.onMapClick:
+          final latitude = call.arguments['lat'] as double;
+          final longitude = call.arguments['lng'] as double;
+          onMapClick?.call(latitude, longitude);
+          break;
+        case Events.onMapReady:
+          onMapReady?.call();
+          break;
+        case Events.onMapRendered:
+          onMapRendered?.call();
+          break;
+        case Events.onStyleLoaded:
+          onStyleLoaded?.call();
+          break;
+        default:
+          debugPrint('Method not implemented');
+      }
+    });
+  }
+
   @override
   Future<String?> getPlatformVersion() async {
     final version =

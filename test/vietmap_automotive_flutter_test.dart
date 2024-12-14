@@ -43,13 +43,13 @@ class MockVietmapAutomotiveFlutterPlatform
     // TODO: implement addPolylines
     throw UnimplementedError();
   }
-  
+
   @override
   Future<bool?> removeAllPolylines() {
     // TODO: implement removeAllPolylines
     throw UnimplementedError();
   }
-  
+
   @override
   Future<bool?> removePolyline({required List<int> polylineIds}) {
     // TODO: implement removePolyline
@@ -72,6 +72,15 @@ class MockVietmapAutomotiveFlutterPlatform
   Future<bool?> removePolygon({required List<int> polygonIds}) {
     // TODO: implement removePolygon
     throw UnimplementedError();
+  }
+
+  @override
+  void init(
+      {void Function()? onMapReady,
+      void Function(double latitude, double longitude)? onMapClick,
+      void Function()? onMapRendered,
+      void Function()? onStyleLoaded}) {
+    // TODO: implement init
   }
 }
 

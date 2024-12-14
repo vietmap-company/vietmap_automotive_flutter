@@ -8,7 +8,7 @@ import 'package:vietmap_automotive_flutter/models/marker.dart';
 import 'package:vietmap_automotive_flutter/models/polygon.dart';
 import 'package:vietmap_automotive_flutter/models/polyline.dart';
 import 'package:vietmap_automotive_flutter/vietmap_automotive_flutter.dart';
-
+import 'package:geolocator/geolocator.dart';
 import 'di/app_context.dart';
 
 void main() {
@@ -35,7 +35,11 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   String _platformVersion = 'Unknown';
-  final _vietmapAutomotiveFlutterPlugin = VietmapAutomotiveFlutter();
+  LatLng? _latLng;
+  bool _isMapReady = false;
+  bool _isMapRendered = false;
+  bool _isStyleLoaded = false;
+  late final VietmapAutomotiveFlutter _vietmapAutomotiveFlutterPlugin;
   final _markers = <Marker>[];
   final _polylines = <Polyline>[];
   final _polygons = <Polygon>[];
@@ -43,15 +47,56 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    initPlatformState();
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) async {
+        await Future.wait(
+          [
+            requestPermission(),
+            initStateFunc(),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> requestPermission() async {
+    final res = await Geolocator.checkPermission();
+    if (res != LocationPermission.always ||
+        res != LocationPermission.whileInUse) {
+      await Geolocator.requestPermission();
+    }
   }
 
   // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> initPlatformState() async {
+  Future<void> initStateFunc() async {
     String platformVersion;
     // Platform messages may fail, so we use a try/catch PlatformException.
     // We also handle the message potentially returning null.
     try {
+      _vietmapAutomotiveFlutterPlugin = VietmapAutomotiveFlutter(
+        onMapClick: (lat, lng) {
+          setState(() {
+            _latLng = LatLng(lat: lat, lng: lng);
+          });
+        },
+        onMapReady: () {
+          setState(() {
+            _isMapReady = true;
+          });
+        },
+        onMapRendered: () {
+          setState(() {
+            _isMapRendered = true;
+          });
+        },
+        onStyleLoaded: () {
+          setState(() {
+            _isStyleLoaded = true;
+          });
+        },
+      );
+
+      _vietmapAutomotiveFlutterPlugin.init();
       platformVersion =
           await _vietmapAutomotiveFlutterPlugin.getPlatformVersion() ??
               'Unknown platform version';
@@ -83,25 +128,9 @@ class _MyAppState extends State<MyApp> {
           width: double.infinity,
           child: Column(
             children: [
-              ElevatedButton(
-                onPressed: () async {
-                  await initPlatformState();
-                },
-                child: Text(
-                  'Running on: $_platformVersion',
-                ),
-              ),
-              const SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: () async {
-                  await _vietmapAutomotiveFlutterPlugin.initAutomotive(
-                    styleUrl: AppContext.getVietmapMapStyleUrl(),
-                    vietMapAPIKey: AppContext.getVietmapAPIKey(),
-                  );
-                },
-                child: const Text(
-                  'Init Automotive',
-                ),
+              Text(
+                'Running on: $_platformVersion',
+                textAlign: TextAlign.center,
               ),
               const SizedBox(height: 10),
               ElevatedButton(
@@ -166,6 +195,26 @@ class _MyAppState extends State<MyApp> {
                   _polygons.addAll(resp);
                 },
                 child: const Text('Add Polygon'),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'Map Click: ${_latLng != null ? 'Lat: ${_latLng!.lat}, Lng: ${_latLng!.lng}' : 'Not Clicked'}',
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'Map Ready: $_isMapReady',
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'Map Rendered: $_isMapRendered',
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'Style Loaded: $_isStyleLoaded',
+                textAlign: TextAlign.center,
               ),
             ],
           ),

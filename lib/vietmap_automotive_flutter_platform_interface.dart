@@ -27,6 +27,15 @@ abstract class VietmapAutomotiveFlutterPlatform extends PlatformInterface {
     _instance = instance;
   }
 
+  void init({
+    void Function()? onMapReady,
+    void Function(double latitude, double longitude)? onMapClick,
+    void Function()? onMapRendered,
+    void Function()? onStyleLoaded,
+  }) {
+    throw UnimplementedError('init() has not been implemented.');
+  }
+
   Future<String?> getPlatformVersion() {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
