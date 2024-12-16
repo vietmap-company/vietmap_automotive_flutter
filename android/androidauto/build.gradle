@@ -65,4 +65,5 @@ dependencies {
     implementation ("com.github.vietmap-company:maps-sdk-navigation-ui-android:2.3.2")
     implementation ("com.github.vietmap-company:maps-sdk-navigation-android:2.3.3")
     implementation( "com.squareup.okhttp3:okhttp:4.10.0")
+    compileOnly("io.flutter:flutter_embedding_debug:1.0.0-0fdb562ac8068ce3dda6b69aca3f355f4d1d2718")
 }

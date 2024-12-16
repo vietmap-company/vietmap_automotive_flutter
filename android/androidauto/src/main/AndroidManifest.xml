@@ -6,6 +6,8 @@
         Android Auto and Automotive OS versions of the app, such as the CarAppService <service> element
     -->
 
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <application>
 
         <meta-data
