@@ -23,7 +23,7 @@ void main() {
 }
 
 void onError(Object error, StackTrace stackTrace) {
-  print('Error: $error');
+  debugPrint('Error: $error');
 }
 
 class MyApp extends StatefulWidget {
