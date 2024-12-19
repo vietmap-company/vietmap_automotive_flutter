@@ -21,7 +21,9 @@ class VietmapAutomotiveFlutter {
     this.onMapClick,
     this.onMapRendered,
     this.onStyleLoaded,
-  });
+  }) {
+    _initPlatformInterface();
+  }
 
   Future<String?> getPlatformVersion() {
     return _vietmapAutomotiveFlutterPlatform.getPlatformVersion();
@@ -80,7 +82,7 @@ class VietmapAutomotiveFlutter {
     return await _vietmapAutomotiveFlutterPlatform.removeAllPolygons();
   }
 
-  void init() {
+  void _initPlatformInterface() {
     _vietmapAutomotiveFlutterPlatform.init(
       onMapReady: onMapReady,
       onMapClick: onMapClick,

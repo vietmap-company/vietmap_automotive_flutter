@@ -84,6 +84,88 @@ For test the app, please follow below document:
 - [Test the app with Desktop Head Unit](https://github.com/vietmap-company/vietmap-android-auto/tree/main?tab=readme-ov-file#test-the-app)
 - [Android Auto](https://developer.android.com/training/cars/testing)
 
+## Features
+
+Vietmap Automotive Flutter has a number of features to send and receive envents from Flutter to Android Auto/Apple Carplay and vice-versa:
+- Adding/removing Markers
+- Adding/removing Polylines
+- Adding/removing Polygons
+- Support for receiving callbacks from VietmapGL on Flutter side
+
+## Implementation
+1. Add the following dependencies to your pubspec.yaml:
+
+``` yaml
+dependencies:
+  flutter:
+    sdk: flutter
+  vietmap_automotive_flutter: <latest_version>
+```
+
+2. Create an .env file in the root of your project and include the following variables:
+
+```
+VIETMAP_API_KEY=your_api_key
+```
+
+The map is initialized using VietmapAutomotiveFlutter, with callbacks to handle various events:
+
+| Callback Parameter | Type | Usage |
+| ------------------ | ---- | ----------- |
+| onMapClick | `void Function(double latitude,double longitude)?` | Receive latitude and longitude when user clicks on Android Auto, Apple Carplay surface |
+| onMapReady | `void Function()?` | Called when the map is fully initialized |
+| onMapRendered | `void Function()?` | Called after the map is rendered |
+| onMapStyleLoaded | `void Function()?` | Called when the map style is successfully loaded |
+
+**Notes: Callbacks are optional to define, each of which are nullable**
+
+``` dart
+    // Variable Initialization
+    late final VietmapAutomotiveFlutter _vietmapAutomotiveFlutterPlugin;
+```
+``` dart
+    // Assigning instance and defining callbacks
+    _vietmapAutomotiveFlutterPlugin = VietmapAutomotiveFlutter(
+        onMapClick: (lat, lng) {
+            setState(() {
+                _location = LatLng(lat, lng);
+            });
+        },
+        onMapReady: () {
+            setState(() {
+                _isMapReady = true;
+            });
+        },
+        onMapRendered: () {
+            setState(() {
+                _isMapRendered = true;
+            });
+        },
+        onStyleLoaded: () {
+            setState(() {
+                _isStyleLoaded = true;
+            });
+        },
+    );
+```
+
+#### Methods
+
+| **Method** | **Signature** | **Usage** |
+| ---------- | ------------- | --------- |
+| initAutomotive | `Future<String?> initAutomotive({required String styleUrl, required String vietMapAPIKey});` | Initializes the map with a specified style URL and API key. |
+| addMarkers | `Future<List<Marker>> addMarkers({required List<Marker> markers});` | Adds markers to the map. |
+| removeMarker | `Future<bool?> removeMarker({required List<int> markerIds});`| Removes specified markers.|
+| removeAllMarkers | `Future<bool?> removeAllMarkers();` | Removes all markers from the map.                           |
+| addPolylines | `Future<List<Polyline>> addPolylines({required List<Polyline> polylines});` | Adds polylines to the map. |
+| removePolyline | `Future<bool?> removePolyline({required List<int> polylineIds});` | Removes specified polylines. |
+| removeAllPolylines | `Future<bool?> removeAllPolylines();` | Removes all polylines from the map. |
+| addPolygons | `Future<List<Polygon>> addPolygons({required List<Polygon> polygons});` | Adds polygons to the map. |
+| removePolygon | `Future<bool?> removePolygon({required List<int> polygonIds});` | Removes specified polygons. |
+| removeAllPolygons | `Future<bool?> removeAllPolygons();` | Removes all polygons from the map. |
+
+For sample usage of each of the function, please visit the [example project](./example/lib/main.dart) 
+
 More information about the Vietmap Automotive SDK can be found at [Vietmap Automotive SDK](https://maps.vietmap.vn/).
 
 <!-- cp -R ~/.pub-cache/hosted/pub.dev/vietmap_automotive_flutter-0.0.1/android/androidauto ./android -->

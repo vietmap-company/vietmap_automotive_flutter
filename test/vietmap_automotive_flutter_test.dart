@@ -69,8 +69,7 @@ class MockVietmapAutomotiveFlutterPlatform
       {void Function()? onMapReady,
       void Function(double latitude, double longitude)? onMapClick,
       void Function()? onMapRendered,
-      void Function()? onStyleLoaded}) {
-  }
+      void Function()? onStyleLoaded}) {}
 }
 
 void main() {
