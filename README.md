@@ -164,7 +164,7 @@ The map is initialized using VietmapAutomotiveFlutter, with callbacks to handle 
 | removePolygon | `Future<bool?> removePolygon({required List<int> polygonIds});` | Removes specified polygons. |
 | removeAllPolygons | `Future<bool?> removeAllPolygons();` | Removes all polygons from the map. |
 
-For sample usage of each of the function, please visit the [example project](./example/lib/main.dart) 
+For sample usage of each of the methods, please visit the [example usage](./example/lib/main.dart).
 
 More information about the Vietmap Automotive SDK can be found at [Vietmap Automotive SDK](https://maps.vietmap.vn/).
 

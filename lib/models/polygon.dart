@@ -4,6 +4,10 @@ import 'package:vietmap_automotive_flutter/utils/color_ext.dart';
 
 import 'latlng.dart';
 
+/// Represents a polygon on the map.
+/// A polygon is a closed shape consisting of a set of points, where line segments are drawn between consecutive points.
+/// The polygon can be styled with a fill color, stroke color, and alpha value.
+/// The polygon can also have holes, which are smaller polygons inside the main polygon.
 class Polygon {
   final List<LatLng> points;
   final List<List<LatLng>> holes;
@@ -12,6 +16,8 @@ class Polygon {
   final double? alpha;
   int? id;
 
+  /// Each polygon must have at least three points.
+  /// Each hole must have at least three points.
   Polygon({
     this.id,
     required this.points,

@@ -18,6 +18,7 @@ class MethodChannelVietmapAutomotiveFlutter
 
   MethodChannelVietmapAutomotiveFlutter();
 
+  /// Set up the method channel and listen for method calls from the native platform.
   @override
   void init({
     void Function()? onMapReady,
@@ -25,6 +26,7 @@ class MethodChannelVietmapAutomotiveFlutter
     void Function()? onMapRendered,
     void Function()? onStyleLoaded,
   }) {
+    /// Set the method call handler to listen for method calls from the native platform.
     methodChannel.setMethodCallHandler((call) async {
       switch (call.method) {
         case Events.onMapClick:
@@ -54,6 +56,7 @@ class MethodChannelVietmapAutomotiveFlutter
     return version;
   }
 
+  /// Initialize the map with the given style URL and VietMap API key.
   @override
   Future<String?> initAutomotive(
       {required String styleUrl, required String vietMapAPIKey}) async {
@@ -65,6 +68,10 @@ class MethodChannelVietmapAutomotiveFlutter
     return responseMessage;
   }
 
+  /// Add the given markers to the map.
+  /// The markers must have a valid image path.
+  /// The image will be loaded from the asset and converted to base64 before sending to the native platform.
+  /// Width and height of each marker must be both provided or both null
   @override
   Future<List<Marker>> addMarkers({required List<Marker> markers}) async {
     final markersJson = <Map<String, dynamic>>[];
@@ -91,6 +98,7 @@ class MethodChannelVietmapAutomotiveFlutter
       markersJson,
     );
 
+    /// If the response is not empty, set the markerId for each marker.
     if (responseMarkersJson?.isNotEmpty ?? false) {
       for (var i = 0; i < markers.length; i++) {
         markers[i].markerId = responseMarkersJson![i];
@@ -101,6 +109,7 @@ class MethodChannelVietmapAutomotiveFlutter
     }
   }
 
+  /// Remove the markers with the given markerIds from the map.
   @override
   Future<bool?> removeMarker({required List<int> markerIds}) async {
     return await methodChannel.invokeMethod<bool>(
@@ -111,11 +120,14 @@ class MethodChannelVietmapAutomotiveFlutter
     );
   }
 
+  /// Remove all markers from the map.
   @override
   Future<bool?> removeAllMarkers() async {
     return await methodChannel.invokeMethod<bool>(Events.removeAllMarkers);
   }
 
+  /// Add the given polylines to the map.
+  /// Each polyline must have at least two points.
   @override
   Future<List<Polyline>> addPolylines(
       {required List<Polyline> polylines}) async {
@@ -127,6 +139,7 @@ class MethodChannelVietmapAutomotiveFlutter
       },
     );
 
+    /// If the response is not empty, set the polylineId for each polyline.
     if (resp?.isNotEmpty ?? false) {
       for (var i = 0; i < polylines.length; i++) {
         polylines[i].id = resp![i];
@@ -137,6 +150,7 @@ class MethodChannelVietmapAutomotiveFlutter
     }
   }
 
+  /// Remove the polylines with the given polylineIds from the map.
   @override
   Future<bool?> removePolyline({required List<int> polylineIds}) async {
     return await methodChannel.invokeMethod<bool>(
@@ -147,11 +161,14 @@ class MethodChannelVietmapAutomotiveFlutter
     );
   }
 
+  /// Remove all polylines from the map.
   @override
   Future<bool?> removeAllPolylines() async {
     return await methodChannel.invokeMethod<bool>(Events.removeAllPolylines);
   }
 
+  /// Add the given polygons to the map.
+  /// Each polygon must have at least three points.
   @override
   Future<List<Polygon>> addPolygons({required List<Polygon> polygons}) async {
     final polygonsJson = polygons.map((e) => e.toJson()).toList();
@@ -172,6 +189,7 @@ class MethodChannelVietmapAutomotiveFlutter
     }
   }
 
+  /// Remove the polygons with the given polygonIds from the map.
   @override
   Future<bool?> removePolygon({required List<int> polygonIds}) async {
     return await methodChannel.invokeMethod<bool>(
@@ -182,6 +200,7 @@ class MethodChannelVietmapAutomotiveFlutter
     );
   }
 
+  /// Remove all polygons from the map.
   @override
   Future<bool?> removeAllPolygons() async {
     return await methodChannel.invokeMethod<bool>(
