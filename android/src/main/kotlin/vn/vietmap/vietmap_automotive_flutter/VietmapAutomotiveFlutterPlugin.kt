@@ -70,7 +70,6 @@ class VietmapAutomotiveFlutterPlugin: FlutterPlugin, MethodCallHandler, Lifecycl
         }
         resourcesLiveData.observe(this) { pair ->
             if(pair.first.isNotEmpty() && pair.second.isNotEmpty() && vietmapCarApp != null){
-                Log.d("VietmapAutomotive", "Init Vietmap Car App")
                 vietmapCarApp?.init(pair.first, pair.second)
             }
         }

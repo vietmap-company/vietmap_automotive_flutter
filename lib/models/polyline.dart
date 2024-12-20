@@ -4,6 +4,9 @@ import 'package:vietmap_automotive_flutter/utils/color_ext.dart';
 
 import 'latlng.dart';
 
+/// Represents a polyline on the map.
+/// A polyline is a list of points, where line segments are drawn between consecutive points.
+/// The polyline can be styled with a color, width, and alpha value.
 class Polyline {
   final List<LatLng> points;
   final Color? color;
@@ -11,14 +14,14 @@ class Polyline {
   final double? alpha;
   int? id;
 
+  /// Each polyline must have at least two points.
   Polyline({
     this.id,
     required this.points,
     this.color,
     this.width,
     this.alpha,
-  })  : assert(points.isNotEmpty, 'Polyline must have at least one point'),
-        assert(points.length >= 2, 'Polyline must have at least two points');
+  }) : assert(points.length >= 2, 'Polyline must have at least two points');
 
   factory Polyline.fromJson(Map<String, dynamic> json) {
     return Polyline(

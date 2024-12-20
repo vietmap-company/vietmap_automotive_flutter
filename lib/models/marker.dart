@@ -1,5 +1,8 @@
 import 'latlng.dart';
 
+/// Represents a marker on the map.
+/// A marker is an icon placed at a particular point on the map's surface.
+/// The marker can be styled with an image, title, and snippet.
 class Marker {
   /// The image path of the marker, allow only image in [png], [jpeg], [jpg] format
   final String imagePath;
@@ -10,6 +13,8 @@ class Marker {
   final int? width;
   final int? height;
 
+  /// The marker must have a valid [imagePath] and [latLng].
+  /// The [width] and [height] must be both provided or both null.
   Marker({
     required this.imagePath,
     required this.latLng,
