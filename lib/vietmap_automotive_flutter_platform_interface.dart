@@ -38,6 +38,52 @@ abstract class VietmapAutomotiveFlutterPlatform extends PlatformInterface {
     throw UnimplementedError('init() has not been implemented.');
   }
 
+  /// Adds a listener to the map ready event.
+  void addOnMapReadyListener(Function() listener) {
+    throw UnimplementedError('addMapReadyListener() has not been implemented.');
+  }
+
+  /// Adds a listener to the map click event.
+  void addOnMapClickListener(Function(double, double) listener) {
+    throw UnimplementedError('addMapClickListener() has not been implemented.');
+  }
+
+  /// Adds a listener to the map rendered event.
+  void addOnMapRenderedListener(Function() listener) {
+    throw UnimplementedError(
+        'addMapRenderedListener() has not been implemented.');
+  }
+
+  /// Adds a listener to the style loaded event.
+  void addOnStyleLoadedListener(Function() listener) {
+    throw UnimplementedError(
+        'addStyleLoadedListener() has not been implemented.');
+  }
+
+  /// Removes a listener from the map ready event.
+  void removeOnMapReadyListener(Function() listener) {
+    throw UnimplementedError(
+        'removeMapReadyListener() has not been implemented.');
+  }
+
+  /// Removes a listener from the map click event.
+  void removeOnMapClickListener(Function(double, double) listener) {
+    throw UnimplementedError(
+        'removeMapClickListener() has not been implemented.');
+  }
+
+  /// Removes a listener from the map rendered event.
+  void removeOnMapRenderedListener(Function() listener) {
+    throw UnimplementedError(
+        'removeMapRenderedListener() has not been implemented.');
+  }
+
+  /// Removes a listener from the style loaded event.
+  void removeOnStyleLoadedListener(Function() listener) {
+    throw UnimplementedError(
+        'removeStyleLoadedListener() has not been implemented.');
+  }
+
   Future<String?> getPlatformVersion() {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }

@@ -39,6 +39,46 @@ class VietmapAutomotiveFlutter {
     _initPlatformInterface();
   }
 
+  /// Adds a listener to the map ready event.
+  void addMapReadyListener(Function() listener) {
+    _vietmapAutomotiveFlutterPlatform.addOnMapReadyListener(listener);
+  }
+
+  /// Adds a listener to the map click event.
+  void addMapClickListener(Function(double, double) listener) {
+    _vietmapAutomotiveFlutterPlatform.addOnMapClickListener(listener);
+  }
+
+  /// Adds a listener to the map rendered event.
+  void addMapRenderedListener(Function() listener) {
+    _vietmapAutomotiveFlutterPlatform.addOnMapRenderedListener(listener);
+  }
+
+  /// Adds a listener to the style loaded event.
+  void addStyleLoadedListener(Function() listener) {
+    _vietmapAutomotiveFlutterPlatform.addOnStyleLoadedListener(listener);
+  }
+
+  /// Removes a listener from the map ready event.
+  void removeMapReadyListener(Function() listener) {
+    _vietmapAutomotiveFlutterPlatform.removeOnMapReadyListener(listener);
+  }
+
+  /// Removes a listener from the map click event.
+  void removeMapClickListener(Function(double, double) listener) {
+    _vietmapAutomotiveFlutterPlatform.removeOnMapClickListener(listener);
+  }
+
+  /// Removes a listener from the map rendered event.
+  void removeMapRenderedListener(Function() listener) {
+    _vietmapAutomotiveFlutterPlatform.removeOnMapRenderedListener(listener);
+  }
+
+  /// Removes a listener from the style loaded event.
+  void removeStyleLoadedListener(Function() listener) {
+    _vietmapAutomotiveFlutterPlatform.removeOnStyleLoadedListener(listener);
+  }
+
   Future<String?> getPlatformVersion() {
     return _vietmapAutomotiveFlutterPlatform.getPlatformVersion();
   }
