@@ -98,6 +98,10 @@ public class VietmapAutomotiveFlutterPlugin: NSObject, FlutterPlugin {
         MemoryLogger.shared.appendEvent("FlutterMethodCall received : \(call.method)")
 
         switch call.method {
+        case "initAutomotive":
+            result("car_app_initialized")
+        case "getPlatformVersion":
+            result("iOS " + UIDevice.current.systemVersion)
         case FCPChannelTypes.setRootTemplate:
 
             guard let args = call.arguments as? [String: Any],

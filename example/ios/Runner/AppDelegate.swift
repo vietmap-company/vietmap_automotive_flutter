@@ -26,8 +26,9 @@ let flutterEngine = FlutterEngine(name: "SharedEngine", project: nil, allowHeadl
         }
         flutterEngine.run()
         GeneratedPluginRegistrant.register(with: flutterEngine)
-
-        return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+//
+//        return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+        return true
     }
 }
 
