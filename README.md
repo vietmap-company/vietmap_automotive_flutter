@@ -16,6 +16,7 @@ Replace `VIETMAP_AUTOMOTIVE_FLUTTER_VERSION` with the latest version of the plug
 ```gradle
 
 def relativePath = ""
+def VIETMAP_AUTOMOTIVE_FLUTTER_VERSION = "0.0.3-pre.1"
 settingsDir.eachDir { subDir ->
     if(subDir.name == "app"){
         def pathComponents =settingsDir.absolutePath.split('/')
@@ -28,7 +29,7 @@ settingsDir.eachDir { subDir ->
 }
 
 include ':androidauto'
-project(':androidauto').projectDir = file("${relativePath}.pub-cache/hosted/pub.dev/vietmap_automotive_flutter-VIETMAP_AUTOMOTIVE_FLUTTER_VERSION/android/androidauto")
+project(':androidauto').projectDir = file("${relativePath}.pub-cache/hosted/pub.dev/vietmap_automotive_flutter-${VIETMAP_AUTOMOTIVE_FLUTTER_VERSION}/android/androidauto")
 ```
 3. Import Android auto module to your `build.gradle` (module app) file:
 ```gradle
