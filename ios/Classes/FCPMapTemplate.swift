@@ -9,7 +9,7 @@
 import CarPlay
 //import heresdk
 import MapKit
-
+import VietMap
 /// A custom CarPlay map template with additional customization options.
 @available(iOS 14.0, *)
 class FCPMapTemplate: NSObject {
@@ -254,7 +254,30 @@ extension FCPMapTemplate: CPMapTemplateDelegate {
             FCPStreamHandlerPlugin.sendEvent(type: FCPChannelTypes.onNavigationStartedFromCarplay, data: ["sourceLatitude": originCoordinate.latitude, "sourceLongitude": originCoordinate.longitude, "destinationLatitude": destinationCoordinate.latitude, "destinationLongitude": destinationCoordinate.longitude])
         }
     }
+    
+    public func mapTemplate(_ mapTemplate: CPMapTemplate, didUpdatePanGestureWithTranslation translation: CGPoint, velocity: CGPoint) {
+            
+            
+        fcpMapViewController?.mapView.setContentInset(fcpMapViewController!.mapView!.safeAreaInsets, animated: false, completionHandler: nil) //make sure this is always up to date in-case safe area changes during gesture
+            updatePan(by: translation, mapTemplate: mapTemplate, animated: false)
 
+            
+        }
+        
+        
+        private func updatePan(by offset: CGPoint, mapTemplate: CPMapTemplate, animated: Bool) {
+            if(fcpMapViewController?.mapView == nil) {return}
+            let coordinate = self.coordinate(of: offset, in: fcpMapViewController!.mapView)
+            fcpMapViewController?.mapView.setCenter(coordinate, animated: animated)
+        }
+        
+        func coordinate(of offset: CGPoint, in mapView: MLNMapView) -> CLLocationCoordinate2D {
+            let contentFrame = mapView.bounds.inset(by: fcpMapViewController!.mapView.safeAreaInsets)
+            let centerPoint = CGPoint(x: contentFrame.midX, y: contentFrame.midY)
+            let endCameraPoint = CGPoint(x: centerPoint.x - offset.x, y: centerPoint.y - offset.y)
+
+            return mapView.convert(endCameraPoint, toCoordinateFrom: mapView)
+        }
     /// Called when the panning interface is shown
     /// - Parameter mapTemplate: The map template
     func mapTemplateDidShowPanningInterface(_: CPMapTemplate) {
