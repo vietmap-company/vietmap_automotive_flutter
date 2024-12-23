@@ -7,6 +7,7 @@ import 'package:vietmap_automotive_flutter/models/polygon.dart';
 import 'package:vietmap_automotive_flutter/models/polyline.dart';
 
 import 'models/events.dart';
+import 'models/map_template.dart';
 import 'vietmap_automotive_flutter_platform_interface.dart';
 
 /// An implementation of [VietmapAutomotiveFlutterPlatform] that uses method channels.
@@ -133,12 +134,17 @@ class MethodChannelVietmapAutomotiveFlutter
 
   /// Initialize the map with the given style URL and VietMap API key.
   @override
-  Future<String?> initAutomotive(
+  Future<bool?> initAutomotive(
       {required String styleUrl, required String vietMapAPIKey}) async {
+    final rootTemplate = CPMapTemplate(
+      hidesButtonsWithNavigationBar: true,
+      styleUrl: styleUrl,
+    );
     final responseMessage =
-        await methodChannel.invokeMethod<String>(Events.initAutomotive, {
+        await methodChannel.invokeMethod<bool>(Events.initAutomotive, {
       'styleUrl': styleUrl,
       'vietMapAPIKey': vietMapAPIKey,
+      'rootTemplate': rootTemplate.toJson(),
     });
     return responseMessage;
   }

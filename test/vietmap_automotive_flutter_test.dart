@@ -14,7 +14,7 @@ class MockVietmapAutomotiveFlutterPlatform
   Future<String?> getPlatformVersion() => Future.value('42');
 
   @override
-  Future<String?> initAutomotive(
+  Future<bool?> initAutomotive(
       {required String styleUrl, required String vietMapAPIKey}) {
     throw UnimplementedError();
   }

@@ -146,7 +146,8 @@ class _MyAppState extends State<MyApp> {
                               const LatLng(lat: 10.762528, lng: 106.653099)),
                       Marker(
                           imagePath: 'assets/40.png',
-                          latLng: const LatLng(lat: 10.762528, lng: 106.753099),
+                          latLng: const LatLng(
+                              lat: 10.759238582476392, lng: 106.67595730119154),
                           width: 80,
                           height: 80),
                     ],

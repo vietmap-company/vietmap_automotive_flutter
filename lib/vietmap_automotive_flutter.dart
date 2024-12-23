@@ -87,7 +87,7 @@ class VietmapAutomotiveFlutter {
   /// Returns a [String] containing the result of the initialization.
   /// car_app_initialized is returned if the map is initialized successfully.
   /// or null if the map is not initialized successfully.
-  Future<String?> initAutomotive(
+  Future<bool?> initAutomotive(
       {required String styleUrl, required String vietMapAPIKey}) async {
     return await _vietmapAutomotiveFlutterPlatform.initAutomotive(
         styleUrl: styleUrl, vietMapAPIKey: vietMapAPIKey);

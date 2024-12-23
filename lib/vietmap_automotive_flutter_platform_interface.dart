@@ -90,7 +90,7 @@ abstract class VietmapAutomotiveFlutterPlatform extends PlatformInterface {
 
   /// Initializes the automotive map with the given style URL and VietMap API key.
   /// This method should be called before using any map-interacting methods.
-  Future<String?> initAutomotive(
+  Future<bool?> initAutomotive(
       {required String styleUrl, required String vietMapAPIKey}) {
     throw UnimplementedError('initAutomotive() has not been implemented.');
   }
