@@ -527,7 +527,7 @@ public class VietmapAutomotiveFlutterPlugin: NSObject, FlutterPlugin {
         
         case FCPChannelTypes.removeAllPolylines:
             if let mapTemplate = VietmapAutomotiveFlutterPlugin.getMapViewTemplate() {
-                let resp = mapTemplate.fcpMapViewController?.removeAllMarkers()
+                let resp = mapTemplate.fcpMapViewController?.removeAllPolylines()
                 result(resp)
             }
             

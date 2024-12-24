@@ -94,6 +94,9 @@ class MockVietmapAutomotiveFlutterPlatform
 
   @override
   void removeOnStyleLoadedListener(Function() listener) {}
+
+  @override
+  void dispose() {}
 }
 
 void main() {

@@ -462,12 +462,29 @@ class FCPVietMapController: UIViewController, CLLocationManagerDelegate {
     }
 }
 
-
+// MARK: - MLNMapViewDelegate
 extension FCPVietMapController: MLNMapViewDelegate {
     func mapView(_ mapView: MLNMapView, strokeColorForShapeAnnotation annotation: MLNShape) -> UIColor {
         return colorUser ? .red : .blue
     }
     
+    // Handles onMapRendered
+    func mapViewDidFinishRenderingMap(_ mapView: MLNMapView, fullyRendered: Bool) {
+        if fullyRendered {
+            FCPStreamHandlerPlugin.sendEvent(type: FCPChannelTypes.onMapRendered, data: [:])
+        }
+    }
+    
+    // Handles onMapReady
+    func mapViewDidFinishLoadingMap(_ mapView: MLNMapView) {
+        FCPStreamHandlerPlugin.sendEvent(type: FCPChannelTypes.onMapReady, data: [:])
+    }
+    
+    // Handles onStyleReady
+    func mapView(_ mapView: MLNMapView, didFinishLoading style: MLNStyle) {
+        FCPStreamHandlerPlugin.sendEvent(type: FCPChannelTypes.onStyleLoaded, data: [:])
+    }
+        
     public func mapView(_ mapView: MLNMapView, imageFor annotation: MLNAnnotation) -> MLNAnnotationImage? {
         guard let dataCustomImage = dataCustomImage else { return annotation as? MLNAnnotationImage}
         let img = UIImage(data: dataCustomImage)
@@ -493,5 +510,20 @@ extension FCPVietMapController: MLNMapViewDelegate {
             annotationImage = MLNAnnotationImage(image: image, reuseIdentifier: "customAnnotation\(markerId)")
         }
         return annotationImage
+    }
+}
+
+// MARK: - UIGestureRecognizerDelegate
+extension FCPVietMapController: UIGestureRecognizerDelegate {
+    public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive event: UIEvent) -> Bool {
+        return true
+    }
+    
+    // Handles on map click
+    @objc func handlePress(_ gesture: UITapGestureRecognizer) {
+        guard gesture.state == .ended else { return }
+        
+        let location = mapView.convert(gesture.location(in: mapView), toCoordinateFrom: mapView)        
+        FCPStreamHandlerPlugin.sendEvent(type: FCPChannelTypes.onMapClick, data: ["lat": location.latitude, "lng": location.longitude])
     }
 }

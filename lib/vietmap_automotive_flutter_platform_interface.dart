@@ -148,4 +148,10 @@ abstract class VietmapAutomotiveFlutterPlatform extends PlatformInterface {
   Future<bool?> removeAllPolygons() {
     throw UnimplementedError('removeAllPolygons() has not been implemented.');
   }
+
+  /// Disposes the stream controllers and removes the listeners.
+  /// This method should be called when the plugin object is no longer needed.
+  void dispose() {
+    throw UnimplementedError('dispose() has not been implemented.');
+  }
 }
