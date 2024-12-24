@@ -26,6 +26,11 @@ class FCPMapPointModel {
         iconBase64Encoded = (obj["base64Encoded"]) as? String
     }
     
+    init(lat: Double, lng: Double){
+        self.lat = lat
+        self.lng = lng
+    }
+    
     func getTitle() -> String? {
         return title
     }

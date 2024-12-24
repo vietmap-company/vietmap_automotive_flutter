@@ -248,6 +248,15 @@ enum FCPChannelTypes {
     /// Event for removing all polylines on Map view in Car Play
     static let removeAllPolylines = "removeAllPolylines"
     
+    /// Event for adding polygons to Map view in Car Play
+    static let addPolygons = "addPolygons"
+    
+    /// Event for removing selected polygons on Map view in Car Play
+    static let removePolygon = "removePolygon"
+    
+    /// Event for removing all polygons on Map view in Car Play
+    static let removeAllPolygons = "removeAllPolygons"
+    
     /// Event for clear annotaion the map view in CarPlay.
     static let clearAnnotationToMap = "clearAnnotationToMap"
 }
