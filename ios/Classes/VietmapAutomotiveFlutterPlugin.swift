@@ -465,7 +465,8 @@ public class VietmapAutomotiveFlutterPlugin: NSObject, FlutterPlugin {
             result([])
         
         case FCPChannelTypes.removeMarker:
-            guard let args = call.arguments as? [String: Any]
+            guard let args = call.arguments as? [String: Any],
+                  let markerIdsList = args["markerIds"] as? [Int]
             else{
                 result(false)
                 return
@@ -473,8 +474,7 @@ public class VietmapAutomotiveFlutterPlugin: NSObject, FlutterPlugin {
             
             let mapTemplate = VietmapAutomotiveFlutterPlugin.getMapViewTemplate()
             if let mapTemplate {
-                let markerIdsList = args["markerIds"] as? [Int]
-                let resp = mapTemplate.fcpMapViewController?.removeMarkers(markerIdsList: markerIdsList ?? [])
+                let resp = mapTemplate.fcpMapViewController?.removeMarkers(markerIdsList: markerIdsList)
                 result(resp)
             }
             
@@ -489,20 +489,45 @@ public class VietmapAutomotiveFlutterPlugin: NSObject, FlutterPlugin {
             
             result(false)
 
-        case FCPChannelTypes.addPolylineToMap:
+        case FCPChannelTypes.addPolylines:
             guard let args = call.arguments as? [String: Any],
-                  let elementId = args["_elementId"] as? String,
-                  let dataArray = args["data"] as? [[String: Any]]
+                  let polylinesArgs = args["polylines"] as? [[String: Any]]
+            else {
+                result([])
+                return
+            }
+            
+            let polylineModels: [FCPPolyline] = polylinesArgs.map{
+                jsonData in
+                FCPPolyline(obj: jsonData)
+            }
+            
+            if let mapTemplate = VietmapAutomotiveFlutterPlugin.getMapViewTemplate() {
+                let resp = mapTemplate.fcpMapViewController?.addPolylines(polylines: polylineModels)
+                result(resp)
+            }
+        
+            result([])
+        
+        case FCPChannelTypes.removePolyline:
+            guard let args = call.arguments as? [String: Any],
+                  let polylineIds = args["polylineIds"] as? [Int]
             else {
                 result(false)
                 return
             }
-            let colorUser = args["colorUser"] as? Bool ?? false
-            let coordinates: [CLLocationCoordinate2D] = dataArray.map { CLLocationCoordinate2D(latitude: $0["lat"] as! CLLocationDegrees, longitude: $0["lng"] as! CLLocationDegrees) }
-            // Find the map template based on the provided element ID
+            
+            if let mapTemplate = VietmapAutomotiveFlutterPlugin.getMapViewTemplate(){
+                let resp = mapTemplate.fcpMapViewController?.removePolylines(polylineIdsList: polylineIds)
+                result(resp)
+            }
+            
+            result(false)
+        
+        case FCPChannelTypes.removeAllPolylines:
             if let mapTemplate = VietmapAutomotiveFlutterPlugin.getMapViewTemplate() {
-                mapTemplate.fcpMapViewController?.addPolyline(coordinates: coordinates, colorUser: colorUser)
-                return result(true)
+                let resp = mapTemplate.fcpMapViewController?.removeAllMarkers()
+                result(resp)
             }
             
             result(false)
