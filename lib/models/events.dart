@@ -1,3 +1,4 @@
+/// The class contains all the events that are used to communicate between the native platform and the plugin.
 class Events {
   const Events._();
 

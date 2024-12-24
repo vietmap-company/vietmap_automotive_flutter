@@ -34,7 +34,6 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  String _platformVersion = 'Unknown';
   LatLng? _latLng;
   bool _isMapReady = false;
   bool _isMapRendered = false;
@@ -67,11 +66,23 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
-  // Platform messages are asynchronous, so we initialize in an async method.
+  void customizeOnMapClick(double lat, double lng) {
+    print('From customizeOnMapClick: Lat: $lat, Lng: $lng');
+  }
+
+  void customizeOnMapReady() {
+    print('From customizeOnMapReady');
+  }
+
+  void customizeOnMapRendered() {
+    print('From customizeOnMapRendered');
+  }
+
+  void customizeOnStyleLoaded() {
+    print('From customizeOnStyleLoaded');
+  }
+
   Future<void> initStateFunc() async {
-    String platformVersion;
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    // We also handle the message potentially returning null.
     try {
       _vietmapAutomotiveFlutterPlugin = VietmapAutomotiveFlutter(
         onMapClick: (lat, lng) {
@@ -96,25 +107,20 @@ class _MyAppState extends State<MyApp> {
         },
       );
 
-      _vietmapAutomotiveFlutterPlugin.init();
-      platformVersion =
-          await _vietmapAutomotiveFlutterPlugin.getPlatformVersion() ??
-              'Unknown platform version';
+      _vietmapAutomotiveFlutterPlugin.addMapClickListener(customizeOnMapClick);
+      _vietmapAutomotiveFlutterPlugin.addMapReadyListener(customizeOnMapReady);
+      _vietmapAutomotiveFlutterPlugin
+          .addMapRenderedListener(customizeOnMapRendered);
+      _vietmapAutomotiveFlutterPlugin
+          .addStyleLoadedListener(customizeOnStyleLoaded);
+
       await _vietmapAutomotiveFlutterPlugin.initAutomotive(
         styleUrl: AppContext.getVietmapMapStyleUrl(),
         vietMapAPIKey: AppContext.getVietmapAPIKey(),
       );
-    } on PlatformException {
-      platformVersion = 'Failed to get platform version.';
+    } catch (e) {
+      debugPrint('Error: $e');
     }
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
-
-    setState(() {
-      _platformVersion = platformVersion;
-    });
   }
 
   @override
@@ -128,11 +134,6 @@ class _MyAppState extends State<MyApp> {
           width: double.infinity,
           child: Column(
             children: [
-              Text(
-                'Running on: $_platformVersion',
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 10),
               ElevatedButton(
                 onPressed: () async {
                   final resp = await _vietmapAutomotiveFlutterPlugin.addMarkers(
@@ -145,7 +146,8 @@ class _MyAppState extends State<MyApp> {
                               const LatLng(lat: 10.762528, lng: 106.653099)),
                       Marker(
                           imagePath: 'assets/40.png',
-                          latLng: const LatLng(lat: 10.762528, lng: 106.753099),
+                          latLng: const LatLng(
+                              lat: 10.759238582476392, lng: 106.67595730119154),
                           width: 80,
                           height: 80),
                     ],
@@ -215,6 +217,38 @@ class _MyAppState extends State<MyApp> {
               Text(
                 'Style Loaded: $_isStyleLoaded',
                 textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 10),
+              ElevatedButton(
+                onPressed: () {
+                  _vietmapAutomotiveFlutterPlugin
+                      .removeMapClickListener(customizeOnMapClick);
+                },
+                child: const Text('Remove onMapClick Listener'),
+              ),
+              const SizedBox(height: 10),
+              ElevatedButton(
+                onPressed: () {
+                  _vietmapAutomotiveFlutterPlugin
+                      .removeMapReadyListener(customizeOnMapReady);
+                },
+                child: const Text('Remove onMapReady Listener'),
+              ),
+              const SizedBox(height: 10),
+              ElevatedButton(
+                onPressed: () {
+                  _vietmapAutomotiveFlutterPlugin
+                      .removeMapRenderedListener(customizeOnMapRendered);
+                },
+                child: const Text('Remove onMapRendered Listener'),
+              ),
+              const SizedBox(height: 10),
+              ElevatedButton(
+                onPressed: () {
+                  _vietmapAutomotiveFlutterPlugin
+                      .removeStyleLoadedListener(customizeOnStyleLoaded);
+                },
+                child: const Text('Remove onStyleLoaded Listener'),
               ),
             ],
           ),

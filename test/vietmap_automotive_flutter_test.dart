@@ -14,7 +14,7 @@ class MockVietmapAutomotiveFlutterPlatform
   Future<String?> getPlatformVersion() => Future.value('42');
 
   @override
-  Future<String?> initAutomotive(
+  Future<bool?> initAutomotive(
       {required String styleUrl, required String vietMapAPIKey}) {
     throw UnimplementedError();
   }
@@ -69,8 +69,31 @@ class MockVietmapAutomotiveFlutterPlatform
       {void Function()? onMapReady,
       void Function(double latitude, double longitude)? onMapClick,
       void Function()? onMapRendered,
-      void Function()? onStyleLoaded}) {
-  }
+      void Function()? onStyleLoaded}) {}
+
+  @override
+  void addOnMapClickListener(Function(double p1, double p2) listener) {}
+
+  @override
+  void addOnMapReadyListener(Function() listener) {}
+
+  @override
+  void addOnMapRenderedListener(Function() listener) {}
+
+  @override
+  void addOnStyleLoadedListener(Function() listener) {}
+
+  @override
+  void removeOnMapClickListener(Function(double lat, double lng) listener) {}
+
+  @override
+  void removeOnMapReadyListener(Function() listener) {}
+
+  @override
+  void removeOnMapRenderedListener(Function() listener) {}
+
+  @override
+  void removeOnStyleLoadedListener(Function() listener) {}
 }
 
 void main() {

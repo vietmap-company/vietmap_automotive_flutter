@@ -1,3 +1,4 @@
+/// LatLng model represents a pair of latitude and longitude coordinates.
 class LatLng {
   final double lat;
   final double lng;
