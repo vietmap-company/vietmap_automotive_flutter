@@ -166,7 +166,8 @@ class _MyAppState extends State<MyApp> {
                     polylines: [
                       Polyline(
                         points: [
-                          const LatLng(lat: 10.762528, lng: 106.653099),
+                          const LatLng(
+                              lat: 10.759238582476392, lng: 106.67595730119154),
                           const LatLng(lat: 10.762528, lng: 106.753099),
                           const LatLng(lat: 10.57234, lng: 106.853099),
                         ],

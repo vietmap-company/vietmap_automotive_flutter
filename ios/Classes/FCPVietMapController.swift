@@ -30,7 +30,11 @@ class FCPVietMapController: UIViewController, CLLocationManagerDelegate {
     
     var markerId:Int = 0
     
+    var polylineId: Int = 0
+    
     var listMarker = [Int : Any]()
+    
+    var listPolyline = [Int: Any]()
     
     var dataCustomImage: Data?
     
@@ -122,11 +126,11 @@ class FCPVietMapController: UIViewController, CLLocationManagerDelegate {
         return markerId
     }
     
-    private func removeMarker(markerId: Int) {
-        let marker = listMarker[markerId]
+    private func removeMarker(selectedMarkerId: Int) {
+        let marker = listMarker[selectedMarkerId]
         if marker != nil {
             mapView.removeAnnotation(marker as! MLNAnnotation)
-            listMarker.removeValue(forKey: markerId)
+            listMarker.removeValue(forKey: selectedMarkerId)
         }
     }
     
@@ -165,7 +169,7 @@ class FCPVietMapController: UIViewController, CLLocationManagerDelegate {
     func removeMarkers(markerIdsList: [Int]) -> Bool {
         if markerIdsList.isEmpty {return false}
         for markerId in markerIdsList {
-            removeMarker(markerId: markerId)
+            removeMarker(selectedMarkerId: markerId)
         }
         return true
     }
@@ -182,12 +186,67 @@ class FCPVietMapController: UIViewController, CLLocationManagerDelegate {
         mapView.removeAnnotations(mapView.annotations ?? [])
     }
     
-    func addPolyline(coordinates: [CLLocationCoordinate2D], colorUser: Bool = false) {
+    private func addPolyline(coordinates: [CLLocationCoordinate2D], colorUser: Bool = false) -> Int {
         self.colorUser = colorUser
         let polyline = MLNPolyline(coordinates: coordinates, count: UInt(coordinates.count))
         mapView.addAnnotation(polyline)
+        
+        listPolyline.updateValue(polyline, forKey: polylineId)
+        return polylineId
     }
     
+    func addPolylines(polylines: [FCPPolyline]) -> [Int] {
+        var listPolylineIds = [Int]()
+
+        for polyline in polylines {
+            var coordinateList: [CLLocationCoordinate2D] = []
+            
+            guard let points = polyline.getPoints(), !points.isEmpty else {
+                continue
+            }
+
+            points.forEach { point in
+                if let latitude = point.getLat(), let longitude = point.getLng() {
+                    coordinateList.append(CLLocationCoordinate2D(latitude: latitude, longitude: longitude))
+                }
+            }
+
+            if !coordinateList.isEmpty {
+                let subPolylineId = addPolyline(coordinates: coordinateList)
+                listPolylineIds.append(subPolylineId)
+                polylineId += 1
+            }
+        }
+        return listPolylineIds
+    }
+    
+    private func removePolyline(selectedPolylineId: Int) {
+        let polyline = listPolyline[selectedPolylineId]
+        if polyline != nil {
+            mapView.removeAnnotation(polyline as! MLNPolyline)
+            listPolyline.removeValue(forKey: selectedPolylineId)
+        }
+    }
+    
+    func removePolylines(polylineIdsList: [Int]) -> Bool {
+        if(polylineIdsList.isEmpty) {
+            return false
+        }
+        for polylineId in polylineIdsList {
+            removePolyline(selectedPolylineId: polylineId)
+        }
+        return true
+    }
+    
+    func removeAllPolylines() -> Bool {
+        for (_, polylineElement) in listPolyline{
+            mapView.removeAnnotation(polylineElement as! MLNPolyline)
+        }
+        listPolyline.removeAll()
+        return true
+    }
+
+
     func showSubviews() {
     }
     
