@@ -32,9 +32,13 @@ class FCPVietMapController: UIViewController, CLLocationManagerDelegate {
     
     var polylineId: Int = 0
     
+    var polygonId: Int = 0
+    
     var listMarker = [Int : Any]()
     
     var listPolyline = [Int: Any]()
+    
+    var listPolygon = [Int: Any]()
     
     var dataCustomImage: Data?
     
@@ -243,6 +247,76 @@ class FCPVietMapController: UIViewController, CLLocationManagerDelegate {
             mapView.removeAnnotation(polylineElement as! MLNPolyline)
         }
         listPolyline.removeAll()
+        return true
+    }
+    
+    private func addPolygon(coordinates: [CLLocationCoordinate2D], polygonHoles: [MLNPolygon] ) -> Int {
+        let polygon = MLNPolygon(coordinates: coordinates, count: UInt(coordinates.count), interiorPolygons: polygonHoles)
+        mapView.addAnnotation(polygon)
+        
+        listPolygon.updateValue(polygon, forKey: polygonId)
+        return polygonId
+    }
+    
+    func addPolygons(polygons: [FCPPolygon]) -> [Int] {
+        var listPolygonIds = [Int]()
+
+        for polygon in polygons {
+            var coordinateList: [CLLocationCoordinate2D] = []
+            var polygonHoles: [MLNPolygon] = []
+
+            // Convert main polygon points to CLLocationCoordinate2D
+            if let points = polygon.getPoints(), !points.isEmpty {
+                coordinateList = points.compactMap { point in
+                    guard let lat = point.getLat(), let lng = point.getLng() else { return nil }
+                    return CLLocationCoordinate2D(latitude: lat, longitude: lng)
+                }
+            }
+
+            // Convert holes to MLNPolygon
+            if let holes = polygon.getHoles(), !holes.isEmpty {
+                polygonHoles = holes.compactMap { holePoints in
+                    let holeCoordinates : [CLLocationCoordinate2D] = holePoints.compactMap { point in
+                        guard let lat = point.getLat(), let lng = point.getLng() else { return nil }
+                        return CLLocationCoordinate2D(latitude: lat, longitude: lng)
+                    }
+                    return holeCoordinates.isEmpty ? nil : MLNPolygon(coordinates: holeCoordinates, count: UInt(holeCoordinates.count))
+                }
+            }
+
+            // Add the polygon and retrieve the ID
+            if !coordinateList.isEmpty {
+                let subPolygonId = addPolygon(coordinates: coordinateList, polygonHoles: polygonHoles)
+                listPolygonIds.append(subPolygonId)
+                polygonId += 1
+            }
+        }
+        return listPolygonIds
+    }
+    
+    private func removePolygon(selectedPolygonId: Int) {
+        let polygon = listPolygon[selectedPolygonId]
+        if polygon != nil {
+            mapView.removeAnnotation(polygon as! MLNPolygon)
+            listPolygon.removeValue(forKey: selectedPolygonId)
+        }
+    }
+    
+    func removePolygons(polygonIdsList: [Int]) -> Bool {
+        if(polygonIdsList.isEmpty) {
+            return false
+        }
+        for polygonId in polygonIdsList {
+            removePolygon(selectedPolygonId: polygonId)
+        }
+        return true
+    }
+
+    func removeAllPolygons() -> Bool {
+        for (_, polygonElement) in listPolygon {
+            mapView.removeAnnotation(polygonElement as! MLNPolygon)
+        }
+        listPolygon.removeAll()
         return true
     }
 

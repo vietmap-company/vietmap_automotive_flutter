@@ -532,6 +532,50 @@ public class VietmapAutomotiveFlutterPlugin: NSObject, FlutterPlugin {
             }
             
             result(false)
+        
+        case FCPChannelTypes.addPolygons:
+            guard let args = call.arguments as? [String: Any],
+                  let polygonsArgs = args["polygons"] as? [[String: Any]]
+            else {
+                result([])
+                return
+            }
+            
+            let polygonModels: [FCPPolygon] = polygonsArgs.map{
+                jsonData in
+                FCPPolygon(obj: jsonData)
+            }
+
+            if let mapTemplate = VietmapAutomotiveFlutterPlugin.getMapViewTemplate() {
+                let resp = mapTemplate.fcpMapViewController?.addPolygons(polygons: polygonModels)
+                result(resp)
+            }
+            
+            result([])
+            
+        case FCPChannelTypes.removePolygon:
+            guard let args = call.arguments as? [String: Any],
+                  let polygonIds = args["polygonIds"] as? [Int]
+            else {
+                result(false)
+                return
+            }
+            
+            if let mapTemplate = VietmapAutomotiveFlutterPlugin.getMapViewTemplate(){
+                let resp = mapTemplate.fcpMapViewController?.removePolygons(polygonIdsList: polygonIds)
+                result(resp)
+            }
+            
+            result(false)
+        
+        case FCPChannelTypes.removeAllPolygons:
+            if let mapTemplate = VietmapAutomotiveFlutterPlugin.getMapViewTemplate() {
+                let resp = mapTemplate.fcpMapViewController?.removeAllPolygons()
+                result(resp)
+            }
+            
+            result(false)
+
 
         case FCPChannelTypes.clearAnnotationToMap:
             guard let args = call.arguments as? [String: Any],
