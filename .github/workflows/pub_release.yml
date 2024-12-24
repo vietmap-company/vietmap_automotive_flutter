@@ -1,8 +1,8 @@
 on:
     release:
       branches:
-        - master
-  jobs:
+        - main
+jobs:
     build:
       runs-on: ubuntu-latest
       steps:
@@ -32,3 +32,4 @@ on:
             credentialJson: ${{ secrets.PUB_DEV_TOKEN }}
             flutter: true
             skipTests: true
+  
