@@ -23,6 +23,18 @@ enum FCPChannelTypes {
     /// Event to get platform version
     static let getPlatformVersion = "getPlatformVersion"
     
+    /// Event to notify Flutter that Car Play map is ready
+    static let onMapReady = "onMapReady"
+    
+    /// Event to notify Flutter that Car Play map is rendered
+    static let onMapRendered = "onMapRendered"
+    
+    /// Event to notify Flutter that Car Play map's style is loaded
+    static let onStyleLoaded = "onStyleLoaded"
+    
+    /// Event to notify an on click event is detected on Car Play Map view
+    static let onMapClick = "onMapClick"
+    
     /// Event to initiate map view on Apple Carplay screen
     static let initAutomotive = "initAutomotive"
     

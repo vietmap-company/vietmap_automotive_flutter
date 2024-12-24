@@ -161,6 +161,11 @@ class VietmapAutomotiveFlutter {
     return await _vietmapAutomotiveFlutterPlatform.removeAllPolygons();
   }
 
+  /// Disposes the stream controllers and removes the listeners.
+  void dispose() {
+    _vietmapAutomotiveFlutterPlatform.dispose();
+  }
+
   void _initPlatformInterface() {
     _vietmapAutomotiveFlutterPlatform.init(
       onMapReady: onMapReady,

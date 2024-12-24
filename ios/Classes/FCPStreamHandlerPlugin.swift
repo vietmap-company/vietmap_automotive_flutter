@@ -17,7 +17,7 @@ class FCPStreamHandlerPlugin: NSObject, FlutterStreamHandler {
     /// - Parameter registrar: The Flutter plugin registrar.
     public required init(registrar: FlutterPluginRegistrar) {
         super.init()
-        let eventChannel = FlutterEventChannel(name: makeFCPChannelId(event: "/event"),
+        let eventChannel = FlutterEventChannel(name: "vietmap_automotive_flutter/events",
                                                binaryMessenger: registrar.messenger())
         eventChannel.setStreamHandler(self)
     }
