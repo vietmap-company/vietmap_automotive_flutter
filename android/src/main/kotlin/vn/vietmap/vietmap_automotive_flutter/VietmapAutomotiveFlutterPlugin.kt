@@ -9,6 +9,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import io.flutter.embedding.engine.plugins.FlutterPlugin
+import io.flutter.plugin.common.EventChannel
+import io.flutter.plugin.common.EventChannel.EventSink
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
@@ -20,6 +22,7 @@ import vn.vietmap.androidauto.events.VietmapAutomotiveEvent
 
 class VietmapAutomotiveFlutterPlugin: FlutterPlugin, MethodCallHandler, LifecycleObserver, LifecycleOwner {
     private lateinit var channel : MethodChannel
+    private var eventSink: EventSink? = null
     var vietmapCarApp : VietMapCarAppScreen? = null
     private val styleUrl: MutableLiveData<String> = MutableLiveData("")
     private val apiKey: MutableLiveData<String> = MutableLiveData("")
@@ -30,19 +33,19 @@ class VietmapAutomotiveFlutterPlugin: FlutterPlugin, MethodCallHandler, Lifecycl
 
     private val automotiveCommunicator = object : IAutomotiveCommunicator {
         override fun onStyleLoaded() {
-            channel.invokeMethod(VietmapAutomotiveEvent.ON_MAP_STYLE_LOADED.nameValue, null)
+            sendEvent(VietmapAutomotiveEvent.ON_MAP_STYLE_LOADED.nameValue, mapOf())
         }
 
         override fun onMapRendered() {
-            channel.invokeMethod(VietmapAutomotiveEvent.ON_MAP_RENDERED.nameValue, null)
+            sendEvent(VietmapAutomotiveEvent.ON_MAP_RENDERED.nameValue, mapOf())
         }
 
         override fun onMapReady() {
-            channel.invokeMethod(VietmapAutomotiveEvent.ON_MAP_READY.nameValue, null)
+            sendEvent(VietmapAutomotiveEvent.ON_MAP_READY.nameValue, mapOf())
         }
 
         override fun onMapClick(lat: Double, lng: Double) {
-            channel.invokeMethod(VietmapAutomotiveEvent.ON_MAP_CLICK.nameValue, mapOf("lat" to lat, "lng" to lng))
+            sendEvent(VietmapAutomotiveEvent.ON_MAP_CLICK.nameValue, mapOf("lat" to lat, "lng" to lng))
         }
     }
 
@@ -58,9 +61,28 @@ class VietmapAutomotiveFlutterPlugin: FlutterPlugin, MethodCallHandler, Lifecycl
         }
     }
 
+    fun sendEvent(type: String, eventData: Map<String, Any>){
+        val data = mutableMapOf<String, Any>()
+        data["type"] = type
+        data["data"] = eventData
+
+        eventSink?.success(data)
+    }
+
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "vietmap_automotive_flutter")
         channel.setMethodCallHandler(this)
+
+        EventChannel(flutterPluginBinding.binaryMessenger, "vietmap_automotive_flutter/events").setStreamHandler(object : EventChannel.StreamHandler {
+            override fun onListen(arguments: Any?, events: EventSink?) {
+                eventSink = events
+            }
+
+            override fun onCancel(arguments: Any?) {
+                eventSink = null
+            }
+        })
+
         lifecycle.addObserver(this)
         VietMapCarAppSession.carAppScreenInstance.observe(this) { screen ->
             if(screen == null) return@observe
@@ -140,5 +162,6 @@ class VietmapAutomotiveFlutterPlugin: FlutterPlugin, MethodCallHandler, Lifecycl
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         channel.setMethodCallHandler(null)
+        eventSink = null
     }
 }
