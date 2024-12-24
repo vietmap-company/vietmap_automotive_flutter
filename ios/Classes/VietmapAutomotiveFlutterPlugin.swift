@@ -516,12 +516,18 @@ public class VietmapAutomotiveFlutterPlugin: NSObject, FlutterPlugin {
                 result(false)
                 return
             }
-            let colorUser = args["colorUser"] as? Bool ?? false
-            let coordinates: [CLLocationCoordinate2D] = dataArray.map { CLLocationCoordinate2D(latitude: $0["lat"] as! CLLocationDegrees, longitude: $0["lng"] as! CLLocationDegrees) }
-            // Find the map template based on the provided element ID
+            
+            if let mapTemplate = VietmapAutomotiveFlutterPlugin.getMapViewTemplate(){
+                let resp = mapTemplate.fcpMapViewController?.removePolylines(polylineIdsList: polylineIds)
+                result(resp)
+            }
+            
+            result(false)
+        
+        case FCPChannelTypes.removeAllPolylines:
             if let mapTemplate = VietmapAutomotiveFlutterPlugin.getMapViewTemplate() {
-                mapTemplate.fcpMapViewController?.addPolyline(coordinates: coordinates, colorUser: colorUser)
-                return result(true)
+                let resp = mapTemplate.fcpMapViewController?.removeAllMarkers()
+                result(resp)
             }
             
             result(false)
