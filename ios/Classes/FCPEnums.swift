@@ -236,6 +236,9 @@ enum FCPChannelTypes {
     /// Event for removing selected markers on Map view in Car Play
     static let removeMarker = "removeMarker"
     
+    /// Event for removing all markers on Map view in Car Play
+    static let removeAllMarkers = "removeAllMarkers"
+    
     /// Event for add polyline the map view in CarPlay.
     static let addPolylineToMap = "addPolylineToMap"
     

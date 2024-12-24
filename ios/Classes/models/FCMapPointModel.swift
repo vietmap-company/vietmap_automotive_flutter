@@ -14,7 +14,7 @@ class FCPMapPointModel {
     private var lng: Double?
     private var width: Int?
     private var height: Int?
-    private var icon: UIImage?
+    private var iconBase64Encoded: String?
 
     init(obj: [String: Any]) {
         title = obj["title"] as? String
@@ -23,9 +23,7 @@ class FCPMapPointModel {
         lng = obj["lng"] as? Double
         width = obj["width"] as? Int
         height = obj["height"] as? Int
-        let base64EncodedStr = (obj["base64Encoded"]) as? String
-        let imageData = Data(base64Encoded: base64EncodedStr!)!
-        icon = UIImage(data: imageData)
+        iconBase64Encoded = (obj["base64Encoded"]) as? String
     }
     
     func getTitle() -> String? {
@@ -52,7 +50,7 @@ class FCPMapPointModel {
         return height
     }
     
-    func getIcon() -> UIImage? {
-        return icon
+    func getIcon() -> String? {
+        return iconBase64Encoded
     }
 }

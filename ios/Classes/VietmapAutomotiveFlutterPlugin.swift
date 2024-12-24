@@ -456,7 +456,7 @@ public class VietmapAutomotiveFlutterPlugin: NSObject, FlutterPlugin {
                 FCPMapPointModel(obj: jsonData)
             }
             
-            // Find the map template based on the provided element ID
+            // Find the map template
             let mapTemplate = VietmapAutomotiveFlutterPlugin.getMapViewTemplate()
             if let mapTemplate {
                 let markerIdsList = mapTemplate.fcpMapViewController?.addMarker(mapPoints: mapPoints)
@@ -472,6 +472,24 @@ public class VietmapAutomotiveFlutterPlugin: NSObject, FlutterPlugin {
                 return
             }
             
+            let mapTemplate = VietmapAutomotiveFlutterPlugin.getMapViewTemplate()
+            if let mapTemplate {
+                let markerIdsList = args["markerIds"] as? [Int]
+                let resp = mapTemplate.fcpMapViewController?.removeMarkers(markerIdsList: markerIdsList ?? [])
+                result(resp)
+            }
+            
+            result(false)
+        
+        case FCPChannelTypes.removeAllMarkers:
+            let mapTemplate = VietmapAutomotiveFlutterPlugin.getMapViewTemplate()
+            if let mapTemplate {
+                let resp = mapTemplate.fcpMapViewController?.removeAllMarkers()
+                result(resp)
+            }
+            
+            result(false)
+
         case FCPChannelTypes.addPolylineToMap:
             guard let args = call.arguments as? [String: Any],
                   let elementId = args["_elementId"] as? String,

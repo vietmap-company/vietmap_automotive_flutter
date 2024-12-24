@@ -32,6 +32,12 @@ class FCPVietMapController: UIViewController, CLLocationManagerDelegate {
     
     var listMarker = [Int : Any]()
     
+    var dataCustomImage: Data?
+    
+    var markerWidth: Int?
+    var markerHeight: Int?
+
+    
     init(styleUrl: String, nibName: String, bundle: Bundle?) {
         self._url = styleUrl
         super.init(nibName: nibName, bundle: bundle)
@@ -88,11 +94,17 @@ class FCPVietMapController: UIViewController, CLLocationManagerDelegate {
     
     func addPoint(point: FCPMapPointModel) -> Int {
         var resizedImage : UIImage? = nil
+        let myData = Data(base64Encoded:point.getIcon()!)!
+        dataCustomImage = myData
+        let markerImage = UIImage(data: myData)
+        markerWidth = point.getWidth()
+        markerHeight = point.getHeight()
+
         if(point.getWidth() != nil && point.getHeight() != nil){
-            resizedImage = resizeImage(image: point.getIcon()!, targetSize: CGSize(width: point.getWidth()!, height: point.getWidth()!))
+            resizedImage = resizeImage(image: markerImage!, targetSize: CGSize(width: point.getWidth()!, height: point.getWidth()!))
         }
         else{
-            resizedImage = point.getIcon()
+            resizedImage = markerImage
         }
         
         _ = MLNAnnotationImage(image: resizedImage!, reuseIdentifier: "custom-marker")
@@ -108,6 +120,14 @@ class FCPVietMapController: UIViewController, CLLocationManagerDelegate {
         // Add the annotation to the map
         mapView.addAnnotation(customMarker)
         return markerId
+    }
+    
+    private func removeMarker(markerId: Int) {
+        let marker = listMarker[markerId]
+        if marker != nil {
+            mapView.removeAnnotation(marker as! MLNAnnotation)
+            listMarker.removeValue(forKey: markerId)
+        }
     }
     
     // Function to resize the UIImage
@@ -142,6 +162,22 @@ class FCPVietMapController: UIViewController, CLLocationManagerDelegate {
         return listMarkerIds
     }
     
+    func removeMarkers(markerIdsList: [Int]) -> Bool {
+        if markerIdsList.isEmpty {return false}
+        for markerId in markerIdsList {
+            removeMarker(markerId: markerId)
+        }
+        return true
+    }
+    
+    func removeAllMarkers() -> Bool {
+        for (_, markerElement) in listMarker{
+            mapView.removeAnnotation(markerElement as! MLNAnnotation)
+        }
+        listMarker.removeAll()
+        return true
+    }
+
     func clearAnnotaion() {
         mapView.removeAnnotations(mapView.annotations ?? [])
     }
@@ -299,7 +335,30 @@ extension FCPVietMapController: MLNMapViewDelegate {
         return colorUser ? .red : .blue
     }
     
-    
-    func mapView(_ mapView: MLNMapView, didFinishLoading style: MLNStyle) {
+    public func mapView(_ mapView: MLNMapView, imageFor annotation: MLNAnnotation) -> MLNAnnotationImage? {
+        guard let dataCustomImage = dataCustomImage else { return annotation as? MLNAnnotationImage}
+        let img = UIImage(data: dataCustomImage)
+        var image : UIImage? = nil
+        if(markerWidth != nil && markerHeight != nil){
+            image = resizeImage(image: img!, targetSize: CGSize(width: markerWidth!, height: markerHeight!))
+        }
+        else{
+            image = img
+        }
+        
+        guard let image = image else { return annotation as? MLNAnnotationImage}
+        if #available(iOS 13.0, *) {
+            image.withTintColor(UIColor.red)
+        } else {
+            // Fallback on earlier versions
+        }
+        let annotationImage:MLNAnnotationImage?
+        if #available(iOS 13.0, *) {
+            annotationImage = MLNAnnotationImage(image: image , reuseIdentifier: "customAnnotation\(markerId)")
+        } else {
+            // Fallback on earlier versions
+            annotationImage = MLNAnnotationImage(image: image, reuseIdentifier: "customAnnotation\(markerId)")
+        }
+        return annotationImage
     }
 }
