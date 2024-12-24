@@ -39,6 +39,46 @@ class VietmapAutomotiveFlutter {
     _initPlatformInterface();
   }
 
+  /// Adds a listener to the map ready event.
+  void addMapReadyListener(Function() listener) {
+    _vietmapAutomotiveFlutterPlatform.addOnMapReadyListener(listener);
+  }
+
+  /// Adds a listener to the map click event.
+  void addMapClickListener(Function(double, double) listener) {
+    _vietmapAutomotiveFlutterPlatform.addOnMapClickListener(listener);
+  }
+
+  /// Adds a listener to the map rendered event.
+  void addMapRenderedListener(Function() listener) {
+    _vietmapAutomotiveFlutterPlatform.addOnMapRenderedListener(listener);
+  }
+
+  /// Adds a listener to the style loaded event.
+  void addStyleLoadedListener(Function() listener) {
+    _vietmapAutomotiveFlutterPlatform.addOnStyleLoadedListener(listener);
+  }
+
+  /// Removes a listener from the map ready event.
+  void removeMapReadyListener(Function() listener) {
+    _vietmapAutomotiveFlutterPlatform.removeOnMapReadyListener(listener);
+  }
+
+  /// Removes a listener from the map click event.
+  void removeMapClickListener(Function(double, double) listener) {
+    _vietmapAutomotiveFlutterPlatform.removeOnMapClickListener(listener);
+  }
+
+  /// Removes a listener from the map rendered event.
+  void removeMapRenderedListener(Function() listener) {
+    _vietmapAutomotiveFlutterPlatform.removeOnMapRenderedListener(listener);
+  }
+
+  /// Removes a listener from the style loaded event.
+  void removeStyleLoadedListener(Function() listener) {
+    _vietmapAutomotiveFlutterPlatform.removeOnStyleLoadedListener(listener);
+  }
+
   Future<String?> getPlatformVersion() {
     return _vietmapAutomotiveFlutterPlatform.getPlatformVersion();
   }
@@ -47,7 +87,7 @@ class VietmapAutomotiveFlutter {
   /// Returns a [String] containing the result of the initialization.
   /// car_app_initialized is returned if the map is initialized successfully.
   /// or null if the map is not initialized successfully.
-  Future<String?> initAutomotive(
+  Future<bool?> initAutomotive(
       {required String styleUrl, required String vietMapAPIKey}) async {
     return await _vietmapAutomotiveFlutterPlatform.initAutomotive(
         styleUrl: styleUrl, vietMapAPIKey: vietMapAPIKey);

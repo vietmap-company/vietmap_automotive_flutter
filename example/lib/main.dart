@@ -66,6 +66,22 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
+  void customizeOnMapClick(double lat, double lng) {
+    print('From customizeOnMapClick: Lat: $lat, Lng: $lng');
+  }
+
+  void customizeOnMapReady() {
+    print('From customizeOnMapReady');
+  }
+
+  void customizeOnMapRendered() {
+    print('From customizeOnMapRendered');
+  }
+
+  void customizeOnStyleLoaded() {
+    print('From customizeOnStyleLoaded');
+  }
+
   Future<void> initStateFunc() async {
     try {
       _vietmapAutomotiveFlutterPlugin = VietmapAutomotiveFlutter(
@@ -90,6 +106,13 @@ class _MyAppState extends State<MyApp> {
           });
         },
       );
+
+      _vietmapAutomotiveFlutterPlugin.addMapClickListener(customizeOnMapClick);
+      _vietmapAutomotiveFlutterPlugin.addMapReadyListener(customizeOnMapReady);
+      _vietmapAutomotiveFlutterPlugin
+          .addMapRenderedListener(customizeOnMapRendered);
+      _vietmapAutomotiveFlutterPlugin
+          .addStyleLoadedListener(customizeOnStyleLoaded);
 
       await _vietmapAutomotiveFlutterPlugin.initAutomotive(
         styleUrl: AppContext.getVietmapMapStyleUrl(),
@@ -123,7 +146,8 @@ class _MyAppState extends State<MyApp> {
                               const LatLng(lat: 10.762528, lng: 106.653099)),
                       Marker(
                           imagePath: 'assets/40.png',
-                          latLng: const LatLng(lat: 10.762528, lng: 106.753099),
+                          latLng: const LatLng(
+                              lat: 10.759238582476392, lng: 106.67595730119154),
                           width: 80,
                           height: 80),
                     ],
@@ -193,6 +217,38 @@ class _MyAppState extends State<MyApp> {
               Text(
                 'Style Loaded: $_isStyleLoaded',
                 textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 10),
+              ElevatedButton(
+                onPressed: () {
+                  _vietmapAutomotiveFlutterPlugin
+                      .removeMapClickListener(customizeOnMapClick);
+                },
+                child: const Text('Remove onMapClick Listener'),
+              ),
+              const SizedBox(height: 10),
+              ElevatedButton(
+                onPressed: () {
+                  _vietmapAutomotiveFlutterPlugin
+                      .removeMapReadyListener(customizeOnMapReady);
+                },
+                child: const Text('Remove onMapReady Listener'),
+              ),
+              const SizedBox(height: 10),
+              ElevatedButton(
+                onPressed: () {
+                  _vietmapAutomotiveFlutterPlugin
+                      .removeMapRenderedListener(customizeOnMapRendered);
+                },
+                child: const Text('Remove onMapRendered Listener'),
+              ),
+              const SizedBox(height: 10),
+              ElevatedButton(
+                onPressed: () {
+                  _vietmapAutomotiveFlutterPlugin
+                      .removeStyleLoadedListener(customizeOnStyleLoaded);
+                },
+                child: const Text('Remove onStyleLoaded Listener'),
               ),
             ],
           ),

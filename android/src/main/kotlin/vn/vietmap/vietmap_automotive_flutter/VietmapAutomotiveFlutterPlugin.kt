@@ -89,7 +89,7 @@ class VietmapAutomotiveFlutterPlugin: FlutterPlugin, MethodCallHandler, Lifecycl
               val data = call.arguments as Map<*, *>
               apiKey.postValue(data["vietMapAPIKey"] as String)
               styleUrl.postValue(data["styleUrl"] as String)
-              result.success("car_app_initialized")
+              result.success(true)
             }
             VietmapAutomotiveEvent.ADD_MARKERS.nameValue -> {
                 val listMarkerIds = vietmapCarApp?.addMarker(call.arguments as List<Map<String, Any>>)
