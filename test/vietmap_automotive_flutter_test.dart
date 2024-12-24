@@ -99,6 +99,7 @@ class MockVietmapAutomotiveFlutterPlatform
   void removeOnStyleLoadedListener(Function() listener) {}
 
   @override
+
   Future<bool> buildRoute({
     required List<LatLng> waypoints,
     MapOptions? options,
@@ -180,6 +181,8 @@ class MockVietmapAutomotiveFlutterPlatform
 
   @override
   void removeOnNavigationRunningListener(Function() listener) {}
+
+
 }
 
 void main() {
