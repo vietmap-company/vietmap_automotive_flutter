@@ -256,6 +256,7 @@ extension FCPMapTemplate: CPMapTemplateDelegate {
     }
     
     public func mapTemplate(_ mapTemplate: CPMapTemplate, didUpdatePanGestureWithTranslation translation: CGPoint, velocity: CGPoint) {
+
             
             
         fcpMapViewController?.mapView.setContentInset(fcpMapViewController!.mapView!.safeAreaInsets, animated: false, completionHandler: nil) //make sure this is always up to date in-case safe area changes during gesture
