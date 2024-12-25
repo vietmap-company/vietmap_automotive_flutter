@@ -29,8 +29,9 @@ jobs:
 
       - name: Push docs
         run: |
-          git config --global user.name "Docs Bot"
-          git config --global user.email "docs-bot-flutter-vietmap-gl@localhost"
+          git config --global user.name "VietMap Docs Bot"
+          git config --global user.email "docs-bot-vietmap-automotive-flutter@localhost"
+          git branch docs
           git add -f docs
           git commit -m "docs: ${{ github.event.commits[0].id }}"
           git push --force origin ${{ github.head_ref || github.ref_name }} :docs
