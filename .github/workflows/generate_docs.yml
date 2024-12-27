@@ -25,11 +25,7 @@ jobs:
       - run: flutter pub get
       
       - name: Generate docs
-<<<<<<< HEAD
         run: flutter pub global run dartdoc --output docs
-=======
-        run: flutter pub global run dartdoc --output doc
->>>>>>> b571234 (feat: update generate docs workflow)
 
       - name: Push docs
         run: |
