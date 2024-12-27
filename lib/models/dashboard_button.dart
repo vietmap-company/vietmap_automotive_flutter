@@ -1,11 +1,7 @@
 import 'package:flutter/foundation.dart';
-import 'package:uuid/uuid.dart';
 
 /// A Dashboard button object for placement in a CarPlay dashboard.
 class CPDashboardButton {
-  /// Unique id of the object.
-  final String _elementId = const Uuid().v4();
-
   /// The title displayed on the dashboard button.
   final List<String> titleVariants;
 
@@ -33,12 +29,7 @@ class CPDashboardButton {
   Map<String, dynamic> toJson() => {
         'subtitleVariants': subtitleVariants,
         'titleVariants': titleVariants,
-        '_elementId': _elementId,
         'darkImage': darkImage,
         'image': image,
       };
-
-  String get uniqueId {
-    return _elementId;
-  }
 }

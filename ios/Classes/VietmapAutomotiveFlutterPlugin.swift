@@ -188,7 +188,7 @@ public class VietmapAutomotiveFlutterPlugin: NSObject, FlutterPlugin {
             }
 
             // Find the map template based on the provided element ID
-            VietmapAutomotiveFlutterPlugin.findMapTemplate(elementId: elementId) { mapTemplate in
+            if let mapTemplate = VietmapAutomotiveFlutterPlugin.getMapViewTemplate() {
 //                mapTemplate.fcpMapViewController?.showBanner(message: message, color: color)
                 return result(true)
             }
@@ -202,7 +202,7 @@ public class VietmapAutomotiveFlutterPlugin: NSObject, FlutterPlugin {
             }
 
             // Find the map template based on the provided element ID
-            VietmapAutomotiveFlutterPlugin.findMapTemplate(elementId: elementId) { mapTemplate in
+            if let mapView = VietmapAutomotiveFlutterPlugin.getMapViewTemplate() {
                 return result(true)
             }
             result(false)
@@ -217,7 +217,7 @@ public class VietmapAutomotiveFlutterPlugin: NSObject, FlutterPlugin {
             }
 
             // Find the map template based on the provided element ID
-            VietmapAutomotiveFlutterPlugin.findMapTemplate(elementId: elementId) { mapTemplate in
+            if let mapTemplate = VietmapAutomotiveFlutterPlugin.getMapViewTemplate() {
                 return result(true)
             }
             result(false)
@@ -235,7 +235,7 @@ public class VietmapAutomotiveFlutterPlugin: NSObject, FlutterPlugin {
             _ = args["subtitle"] as? String
 
             // Find the map template based on the provided element ID
-            VietmapAutomotiveFlutterPlugin.findMapTemplate(elementId: elementId) { mapTemplate in
+            if let mapTemplate = VietmapAutomotiveFlutterPlugin.getMapViewTemplate() {
 //                mapTemplate.fcpMapViewController?.showOverlay(primaryTitle: primaryTitle, secondaryTitle: secondaryTitle, subtitle: subtitle)
                 return result(true)
             }
@@ -249,14 +249,13 @@ public class VietmapAutomotiveFlutterPlugin: NSObject, FlutterPlugin {
             }
 
             // Find the map template based on the provided element ID
-            VietmapAutomotiveFlutterPlugin.findMapTemplate(elementId: elementId) { mapTemplate in
+            if let mapTemplate = VietmapAutomotiveFlutterPlugin.getMapViewTemplate() {
                 return result(true)
             }
             result(false)
 
         case FCPChannelTypes.showPanningInterface:
             guard let args = call.arguments as? [String: Any],
-                  let elementId = args["_elementId"] as? String,
                   let animated = args["animated"] as? Bool
             else {
                 result(false)
@@ -264,7 +263,7 @@ public class VietmapAutomotiveFlutterPlugin: NSObject, FlutterPlugin {
             }
 
             // Find the map template based on the provided element ID
-            VietmapAutomotiveFlutterPlugin.findMapTemplate(elementId: elementId) { mapTemplate in
+            if let mapTemplate = VietmapAutomotiveFlutterPlugin.getMapViewTemplate() {
                 mapTemplate.showPanningInterface(animated: animated)
                 return result(true)
             }
@@ -280,7 +279,7 @@ public class VietmapAutomotiveFlutterPlugin: NSObject, FlutterPlugin {
             }
 
             // Find the map template based on the provided element ID
-            VietmapAutomotiveFlutterPlugin.findMapTemplate(elementId: elementId) { mapTemplate in
+            if let mapTemplate = VietmapAutomotiveFlutterPlugin.getMapViewTemplate() {
                 mapTemplate.dismissPanningInterface(animated: animated)
                 return result(true)
             }
@@ -295,7 +294,7 @@ public class VietmapAutomotiveFlutterPlugin: NSObject, FlutterPlugin {
             }
 
             // Find the map template based on the provided element ID
-            VietmapAutomotiveFlutterPlugin.findMapTemplate(elementId: elementId) { mapTemplate in
+            if let mapTemplate = VietmapAutomotiveFlutterPlugin.getMapViewTemplate() {
                 mapTemplate.fcpMapViewController?.zoomInMapView()
                 return result(true)
             }
@@ -310,7 +309,7 @@ public class VietmapAutomotiveFlutterPlugin: NSObject, FlutterPlugin {
             }
 
             // Find the map template based on the provided element ID
-            VietmapAutomotiveFlutterPlugin.findMapTemplate(elementId: elementId) { mapTemplate in
+            if let mapTemplate = VietmapAutomotiveFlutterPlugin.getMapViewTemplate() {
                 mapTemplate.fcpMapViewController?.zoomOutMapView()
                 return result(true)
             }
@@ -327,7 +326,7 @@ public class VietmapAutomotiveFlutterPlugin: NSObject, FlutterPlugin {
             }
 
             // Find the map template based on the provided element ID
-            VietmapAutomotiveFlutterPlugin.findMapTemplate(elementId: elementId) { mapTemplate in
+            if let mapTemplate = VietmapAutomotiveFlutterPlugin.getMapViewTemplate() {
                 let cpTrip = FCPTrip(obj: trip).get
                 mapTemplate.startNavigation(trip: cpTrip)
                 return result(true)
@@ -343,7 +342,7 @@ public class VietmapAutomotiveFlutterPlugin: NSObject, FlutterPlugin {
             }
 
             // Find the map template based on the provided element ID
-            VietmapAutomotiveFlutterPlugin.findMapTemplate(elementId: elementId) { mapTemplate in
+            if let mapTemplate = VietmapAutomotiveFlutterPlugin.getMapViewTemplate() {
                 mapTemplate.stopNavigation()
                 return result(true)
             }
@@ -369,7 +368,7 @@ public class VietmapAutomotiveFlutterPlugin: NSObject, FlutterPlugin {
                 return
             }
             // Find the map template based on the provided element ID
-            VietmapAutomotiveFlutterPlugin.findMapTemplate(elementId: elementId) { mapTemplate in
+            if let mapTemplate = VietmapAutomotiveFlutterPlugin.getMapViewTemplate() {
                 mapTemplate.fcpMapViewController?.centerMap()
                 return result(true)
             }
@@ -393,7 +392,7 @@ public class VietmapAutomotiveFlutterPlugin: NSObject, FlutterPlugin {
                 return
             }
             // Find the map template based on the provided element ID
-            VietmapAutomotiveFlutterPlugin.findMapTemplate(elementId: elementId) { mapTemplate in
+            if let mapTemplate = VietmapAutomotiveFlutterPlugin.getMapViewTemplate() {
                 mapTemplate.fcpMapViewController?.clearMapList()
                 return result(true)
             }
@@ -408,7 +407,7 @@ public class VietmapAutomotiveFlutterPlugin: NSObject, FlutterPlugin {
                 return
             }
             // Find the map template based on the provided element ID
-            VietmapAutomotiveFlutterPlugin.findMapTemplate(elementId: elementId) { mapTemplate in
+            if let mapTemplate = VietmapAutomotiveFlutterPlugin.getMapViewTemplate() {
                 mapTemplate.fcpMapViewController?.scrollUpSubList()
                 return result(true)
             }
@@ -423,7 +422,7 @@ public class VietmapAutomotiveFlutterPlugin: NSObject, FlutterPlugin {
                 return
             }
             // Find the map template based on the provided element ID
-            VietmapAutomotiveFlutterPlugin.findMapTemplate(elementId: elementId) { mapTemplate in
+            if let mapTemplate = VietmapAutomotiveFlutterPlugin.getMapViewTemplate() {
                 mapTemplate.fcpMapViewController?.scrollDownSubList()
                 return result(true)
             }
@@ -439,7 +438,7 @@ public class VietmapAutomotiveFlutterPlugin: NSObject, FlutterPlugin {
                 return
             }
             // Find the map template based on the provided element ID
-            VietmapAutomotiveFlutterPlugin.findMapTemplate(elementId: elementId) { mapTemplate in
+            if let mapTemplate = VietmapAutomotiveFlutterPlugin.getMapViewTemplate() {
                 mapTemplate.fcpMapViewController?.scrollToIndex(index: index)
                 return result(true)
             }
@@ -501,7 +500,7 @@ public class VietmapAutomotiveFlutterPlugin: NSObject, FlutterPlugin {
             let colorUser = args["colorUser"] as? Bool ?? false
             let coordinates: [CLLocationCoordinate2D] = dataArray.map { CLLocationCoordinate2D(latitude: $0["lat"] as! CLLocationDegrees, longitude: $0["lng"] as! CLLocationDegrees) }
             // Find the map template based on the provided element ID
-            VietmapAutomotiveFlutterPlugin.findMapTemplate(elementId: elementId) { mapTemplate in
+            if let mapTemplate = VietmapAutomotiveFlutterPlugin.getMapViewTemplate() {
                 mapTemplate.fcpMapViewController?.addPolyline(coordinates: coordinates, colorUser: colorUser)
                 return result(true)
             }
@@ -516,7 +515,7 @@ public class VietmapAutomotiveFlutterPlugin: NSObject, FlutterPlugin {
                 return
             }
             // Find the map template based on the provided element ID
-            VietmapAutomotiveFlutterPlugin.findMapTemplate(elementId: elementId) { mapTemplate in
+            if let mapTemplate = VietmapAutomotiveFlutterPlugin.getMapViewTemplate() {
                 mapTemplate.fcpMapViewController?.clearAnnotaion()
                 return result(true)
             }
@@ -696,7 +695,7 @@ extension VietmapAutomotiveFlutterPlugin {
     ///   - args: Additional arguments for updating the list template.
     private func updateMapTemplate(elementId: String, args: [String: Any]) {
         // Find the map template based on the provided element ID
-        VietmapAutomotiveFlutterPlugin.findMapTemplate(elementId: elementId) { mapTemplate in
+        if let mapTemplate = VietmapAutomotiveFlutterPlugin.getMapViewTemplate() {
             // Extract and handle the data for updating the map template
             let title = args["title"] as? String
             let hidesButtonsWithNavigationBar = args["hidesButtonsWithNavigationBar"] as? Bool
@@ -732,24 +731,7 @@ extension VietmapAutomotiveFlutterPlugin {
 
 // MARK: - Find FCPObjects
 @available(iOS 14.0, *)
-private extension VietmapAutomotiveFlutterPlugin {
-    /// Finds a CarPlay map template by element ID and performs an action when found.
-    ///
-    /// - Parameters:
-    ///   - elementId: The element ID of the map template.
-    ///   - actionWhenFound: The action to perform when the map template is found.
-    static func findMapTemplate(elementId: String, actionWhenFound: (_ template: FCPMapTemplate) -> Void) {
-        // Get the array of FCPMapTemplate instances.
-        let templates = getFCPMapTemplatesFromHistory()
-
-        // Iterate through the templates to find the one with the matching element ID.
-        for template in templates where template.elementId == elementId {
-            // Perform the specified action when the template is found.
-            actionWhenFound(template)
-            break
-        }
-    }
-    
+extension VietmapAutomotiveFlutterPlugin {
     /// Gets Current Map view template
     static func getMapViewTemplate() -> FCPMapTemplate? {
         let templates = getFCPMapTemplatesFromHistory()

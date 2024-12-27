@@ -10,6 +10,7 @@ import CarPlay
 import MapKit
 import UIKit
 import VietMap
+import VietMapNavigation
 
 /// A custom CarPlay map view controller.
 class FCPVietMapController: UIViewController, CLLocationManagerDelegate {
@@ -80,7 +81,10 @@ class FCPVietMapController: UIViewController, CLLocationManagerDelegate {
     
     func startMapView() {
         mapView = MLNMapView(frame: view.bounds, styleURL: URL(string: _url))
-        mapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        mapView.autoresizingMask = [.flexibleWidth, .flexibleLeftMargin, .flexibleRightMargin, .flexibleTopMargin, .flexibleBottomMargin]
+        mapView.translatesAutoresizingMaskIntoConstraints = true
+        mapView.mask = view.mask
+        mapView.isPitchEnabled = false
         mapView.delegate = self
         mapView.userTrackingMode = .follow
         mapView.compassView.compassVisibility = .hidden
@@ -196,14 +200,14 @@ class FCPVietMapController: UIViewController, CLLocationManagerDelegate {
     
     func zoomInMapView() {
         let currentZoomLevel = mapView.zoomLevel
-        if currentZoomLevel > 15 {return}
+        if currentZoomLevel > 21 {return}
         let newZoomLevel = currentZoomLevel + 1
         mapView.setZoomLevel(newZoomLevel, animated: true)
     }
     
     func zoomOutMapView() {
         let currentZoomLevel = mapView.zoomLevel
-        if currentZoomLevel < 2 {return}
+        if currentZoomLevel < 1 {return}
         let newZoomLevel = currentZoomLevel - 1
         mapView.setZoomLevel(newZoomLevel, animated: true)
     }
@@ -216,6 +220,7 @@ class FCPVietMapController: UIViewController, CLLocationManagerDelegate {
     }
     
     func panInDirection(_ direction: CPMapTemplate.PanDirection) {
+        let cameraCurrentCenterCoordinate = mapView.centerCoordinate
         let constantChange = 100.0
         let cameraCenter = mapView.camera
         var offset = mapView.convert(cameraCenter.centerCoordinate, toPointTo: mapView)
@@ -237,6 +242,7 @@ class FCPVietMapController: UIViewController, CLLocationManagerDelegate {
         let offsetCoordinate = mapView.convert(offset, toCoordinateFrom: mapView)
         let camera = MLNMapCamera(lookingAtCenter: offsetCoordinate, altitude: mapView.camera.altitude, pitch: mapView.camera.pitch, heading: mapView.camera.heading)
         mapView.setCamera(camera, animated: true)
+        mapView.setCenter(cameraCurrentCenterCoordinate, animated: false)
     }
     
     func addMapList(data: [FCPMapListModel], estimatePoint: FCPMapListHeaderModel?) {

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 
-import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:vietmap_automotive_flutter/models/latlng.dart';
 import 'package:vietmap_automotive_flutter/models/marker.dart';
@@ -67,19 +66,19 @@ class _MyAppState extends State<MyApp> {
   }
 
   void customizeOnMapClick(double lat, double lng) {
-    print('From customizeOnMapClick: Lat: $lat, Lng: $lng');
+    debugPrint('From customizeOnMapClick: Lat: $lat, Lng: $lng');
   }
 
   void customizeOnMapReady() {
-    print('From customizeOnMapReady');
+    debugPrint('From customizeOnMapReady');
   }
 
   void customizeOnMapRendered() {
-    print('From customizeOnMapRendered');
+    debugPrint('From customizeOnMapRendered');
   }
 
   void customizeOnStyleLoaded() {
-    print('From customizeOnStyleLoaded');
+    debugPrint('From customizeOnStyleLoaded');
   }
 
   Future<void> initStateFunc() async {
