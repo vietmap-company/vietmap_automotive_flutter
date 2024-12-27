@@ -71,10 +71,10 @@
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">Map&lt;String, dynamic&gt; toJson() =&gt; {
       &#39;isEnabled&#39;: isEnabled,
-      &#39;_elementId&#39;: _elementId,
       if (title != null) &#39;title&#39;: title,
       if (image != null) &#39;image&#39;: image,
       &#39;style&#39;: style.name,
+      &#39;onClickEvent&#39;: onClickEvent.name,
     };</code></pre>
 </section>
 

@@ -82,16 +82,42 @@
   <pre class="language-dart"><code class="language-dart">@override
 Future&lt;bool?&gt; initAutomotive(
     {required String styleUrl, required String vietMapAPIKey}) async {
-  final rootTemplate = CPMapTemplate(
-    hidesButtonsWithNavigationBar: true,
-    styleUrl: styleUrl,
-  );
-  final responseMessage =
-      await methodChannel.invokeMethod&lt;bool&gt;(Events.initAutomotive, {
+  final initDataJson = &lt;String, dynamic&gt;{
     &#39;styleUrl&#39;: styleUrl,
     &#39;vietMapAPIKey&#39;: vietMapAPIKey,
-    &#39;rootTemplate&#39;: rootTemplate.toJson(),
-  });
+  };
+  if (Platform.isIOS) {
+    final rootTemplate = CPMapTemplate(
+      hidesButtonsWithNavigationBar: true,
+      styleUrl: styleUrl,
+      mapButtons: [
+        CPMapButton(
+          onClickEvent: OnClickEvents.showPanningInterface,
+        ),
+        CPMapButton(
+          onClickEvent: OnClickEvents.recenterMapView,
+        ),
+        CPMapButton(
+          onClickEvent: OnClickEvents.zoomInMapView,
+        ),
+        CPMapButton(
+          onClickEvent: OnClickEvents.zoomOutMapView,
+        ),
+      ],
+      trailingNavigationBarButtons: [
+        CPBarButton(
+          onClickEvent: OnClickEvents.dismissPanningInterface,
+          title: &#39;Close&#39;,
+        ),
+      ],
+    );
+    initDataJson[&#39;rootTemplate&#39;] = rootTemplate.toJson();
+  }
+
+  final responseMessage = await methodChannel.invokeMethod&lt;bool&gt;(
+    Events.initAutomotive,
+    initDataJson,
+  );
   return responseMessage;
 }</code></pre>
 </section>
