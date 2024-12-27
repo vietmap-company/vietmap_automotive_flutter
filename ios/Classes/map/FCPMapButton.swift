@@ -13,14 +13,14 @@ class FCPMapButton {
     /// The underlying CPMapButton instance.
     private(set) var _super: CPMapButton?
 
-    /// The unique identifier for the map button.
-    private(set) var elementId: String
-
     /// A Boolean value indicating whether the map button is enabled.
     private var isEnabled: Bool = true
 
     /// A Boolean value indicating whether the map button is hidden.
     private var isHidden: Bool = false
+    
+    /// An enum indicating the event of this map button
+    private var onClickEvent: String?
 
     /// The image associated with the map button.
     private var image: UIImage?
@@ -32,16 +32,14 @@ class FCPMapButton {
     ///
     /// - Parameter obj: A dictionary containing information about the map button.
     init(obj: [String: Any]) {
-        guard let elementId = obj["_elementId"] as? String else {
-            fatalError("Missing required keys in dictionary for FCPMapButton initialization..")
-        }
-
-        self.elementId = elementId
         isEnabled = obj["isEnabled"] as? Bool ?? true
         isHidden = obj["isHidden"] as? Bool ?? false
-
+        
+        onClickEvent = obj["onClickEvent"] as? String
+        
+        
         image = UIImage.dynamicImage(lightImage: obj["image"] as? String,
-                                     darkImage: obj["darkImage"] as? String)
+                                     darkImage: obj["darkImage"] as? String) ?? UIImage(named: FCPIconTypes.getIconType(from: onClickEvent ?? ""), in: Bundle(for: type(of: self)), compatibleWith: nil)!
 
         if let tintColor = obj["tintColor"] as? Int {
             image = image?.withColor(UIColor(argb: tintColor))
@@ -55,9 +53,25 @@ class FCPMapButton {
     /// Returns the underlying CPMapButton instance configured with the specified properties.
     var get: CPMapButton {
         let mapButton = CPMapButton { [weak self] _ in
-            guard let self = self else { return }
-            DispatchQueue.main.async {
-                FCPStreamHandlerPlugin.sendEvent(type: FCPChannelTypes.onMapButtonPressed, data: ["elementId": self.elementId])
+            guard let self = self,
+                  let mapTemplate = VietmapAutomotiveFlutterPlugin.getMapViewTemplate()
+            else{
+                return
+            }
+            
+            switch onClickEvent {
+                case FCPChannelTypes.showPanningInterface:
+                    mapTemplate.showPanningInterface(animated: true)
+                case FCPChannelTypes.dismissPanningInterface:
+                    mapTemplate.dismissPanningInterface(animated: true)
+                case FCPChannelTypes.zoomInMapView:
+                    mapTemplate.fcpMapViewController?.zoomInMapView()
+                case FCPChannelTypes.zoomOutMapView:
+                    mapTemplate.fcpMapViewController?.zoomOutMapView()
+                case FCPChannelTypes.recenterMapView:
+                    mapTemplate.fcpMapViewController?.centerMap()
+                default:
+                    debugPrint("Method not implemented")
             }
         }
         mapButton.isHidden = isHidden

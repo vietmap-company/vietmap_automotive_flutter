@@ -275,3 +275,31 @@ enum MapMarkerType: String {
     /// Represents a destination address marker in CarPlay.
     case DESTINATION_ADDRESS
 }
+
+/// Enum defining the button icons
+enum FCPIconTypes : String{
+    case zoomInMapView = "zoomInMapView"
+    case zoomOutMapView = "zoomOutMapView"
+    case showPanningInterface = "showPanningInterface"
+    case recenterMapView = "recenterMapView"
+    
+    func iconImageName() -> String{
+        switch self {
+            case .recenterMapView:
+                return "carplay_locate"
+            case .zoomInMapView:
+                return "carplay_plus"
+            case .zoomOutMapView:
+                return "carplay_minus"
+            case .showPanningInterface:
+                return "carplay_pan"
+        }
+    }
+    
+    static func getIconType(from actionType: String) -> String {
+        if let actionType = FCPIconTypes(rawValue: actionType){
+            return actionType.iconImageName()
+        }
+        return "carplay_locate"
+    }
+}

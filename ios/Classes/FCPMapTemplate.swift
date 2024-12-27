@@ -10,6 +10,7 @@ import CarPlay
 //import heresdk
 import MapKit
 import VietMap
+import VietMapNavigation
 /// A custom CarPlay map template with additional customization options.
 @available(iOS 14.0, *)
 class FCPMapTemplate: NSObject {
@@ -20,9 +21,6 @@ class FCPMapTemplate: NSObject {
 
     /// The view controller associated with the map template.
     private(set) var viewController: UIViewController?
-
-    /// The unique identifier for the map template.
-    private(set) var elementId: String
 
     /// The title displayed on the map template.
     private var title: String?
@@ -62,11 +60,6 @@ class FCPMapTemplate: NSObject {
     ///
     /// - Parameter obj: A dictionary containing the configuration parameters for the map template.
     init(obj: [String: Any]) {
-        guard let elementId = obj["_elementId"] as? String else {
-            fatalError("[FCPMapTemplate] Missing required property: _elementId.")
-        }
-
-        self.elementId = elementId
         title = obj["title"] as? String
         automaticallyHidesNavigationBar = obj["automaticallyHidesNavigationBar"] as? Bool ?? false
         hidesButtonsWithNavigationBar = obj["hidesButtonsWithNavigationBar"] as? Bool ?? false
@@ -75,7 +68,7 @@ class FCPMapTemplate: NSObject {
         mapButtons = (obj["mapButtons"] as? [[String: Any]] ?? []).map {
             FCPMapButton(obj: $0)
         }
-
+        
         dashboardButtons = (obj["dashboardButtons"] as? [[String: Any]] ?? []).map {
             FCPDashboardButton(obj: $0)
         }
@@ -256,9 +249,6 @@ extension FCPMapTemplate: CPMapTemplateDelegate {
     }
     
     public func mapTemplate(_ mapTemplate: CPMapTemplate, didUpdatePanGestureWithTranslation translation: CGPoint, velocity: CGPoint) {
-
-            
-            
         fcpMapViewController?.mapView.setContentInset(fcpMapViewController!.mapView!.safeAreaInsets, animated: false, completionHandler: nil) //make sure this is always up to date in-case safe area changes during gesture
             updatePan(by: translation, mapTemplate: mapTemplate, animated: false)
 

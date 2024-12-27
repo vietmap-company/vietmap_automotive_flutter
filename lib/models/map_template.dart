@@ -1,14 +1,9 @@
-import 'package:uuid/uuid.dart';
-
 import 'bar_button.dart';
 import 'dashboard_button.dart';
 import 'map_button.dart';
 
 /// A template object that displays map.
 class CPMapTemplate {
-  /// Unique id of the object.
-  final String _elementId = const Uuid().v4();
-
   /// A title will be shown in the navigation bar.
   String title;
 
@@ -57,7 +52,6 @@ class CPMapTemplate {
   });
 
   Map<String, dynamic> toJson() => {
-        '_elementId': _elementId,
         'title': title,
         'mapButtons': mapButtons.map((e) => e.toJson()).toList(),
         'dashboardButtons': dashboardButtons.map((e) => e.toJson()).toList(),
@@ -74,8 +68,4 @@ class CPMapTemplate {
         'isPanningInterfaceVisible': isPanningInterfaceVisible,
         'styleUrl': styleUrl,
       };
-
-  String get uniqueId {
-    return _elementId;
-  }
 }
