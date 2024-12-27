@@ -1,6 +1,6 @@
 name: vietmap_automotive_flutter
 description: "A Flutter plugin for integrating turn by turn navigation with Vietmap Android Auto and Vietmap Apple CarPlay SDK."
-version: 0.0.2
+version: 0.0.3-pre.2
 homepage: https://maps.vietmap.vn
 repository: https://github.com/vietmap-company/vietmap_automotive_flutter
 issue_tracker: https://github.com/vietmap-company/vietmap_automotive_flutter/issues
