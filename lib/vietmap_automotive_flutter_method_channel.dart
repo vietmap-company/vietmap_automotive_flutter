@@ -1,8 +1,12 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:vietmap_automotive_flutter/models/bar_button.dart';
+import 'package:vietmap_automotive_flutter/models/map_button.dart';
 import 'package:vietmap_automotive_flutter/models/marker.dart';
+import 'package:vietmap_automotive_flutter/models/on_click_events.dart';
 import 'package:vietmap_automotive_flutter/models/polygon.dart';
 import 'package:vietmap_automotive_flutter/models/polyline.dart';
 
@@ -136,16 +140,42 @@ class MethodChannelVietmapAutomotiveFlutter
   @override
   Future<bool?> initAutomotive(
       {required String styleUrl, required String vietMapAPIKey}) async {
-    final rootTemplate = CPMapTemplate(
-      hidesButtonsWithNavigationBar: true,
-      styleUrl: styleUrl,
-    );
-    final responseMessage =
-        await methodChannel.invokeMethod<bool>(Events.initAutomotive, {
+    final initDataJson = <String, dynamic>{
       'styleUrl': styleUrl,
       'vietMapAPIKey': vietMapAPIKey,
-      'rootTemplate': rootTemplate.toJson(),
-    });
+    };
+    if (Platform.isIOS) {
+      final rootTemplate = CPMapTemplate(
+        hidesButtonsWithNavigationBar: true,
+        styleUrl: styleUrl,
+        mapButtons: [
+          CPMapButton(
+            onClickEvent: OnClickEvents.showPanningInterface,
+          ),
+          CPMapButton(
+            onClickEvent: OnClickEvents.recenterMapView,
+          ),
+          CPMapButton(
+            onClickEvent: OnClickEvents.zoomInMapView,
+          ),
+          CPMapButton(
+            onClickEvent: OnClickEvents.zoomOutMapView,
+          ),
+        ],
+        trailingNavigationBarButtons: [
+          CPBarButton(
+            onClickEvent: OnClickEvents.dismissPanningInterface,
+            title: 'Close',
+          ),
+        ],
+      );
+      initDataJson['rootTemplate'] = rootTemplate.toJson();
+    }
+
+    final responseMessage = await methodChannel.invokeMethod<bool>(
+      Events.initAutomotive,
+      initDataJson,
+    );
     return responseMessage;
   }
 

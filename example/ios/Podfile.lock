@@ -57,7 +57,7 @@ SPEC CHECKSUMS:
   geolocator_apple: 9bcea1918ff7f0062d98345d238ae12718acfbc1
   integration_test: 252f60fa39af5e17c3aa9899d35d908a0721b573
   VietMap: 1fc4a1e27896a19bc8b8a62e2227b1e0116a698d
-  vietmap_automotive_flutter: d2a865d862e26dac019403c1301604e491bd85b0
+  vietmap_automotive_flutter: 54dac74f53d043bf8f6196479ffe844ff5cb2ca2
   VietMapCoreNavigation: a5a6e2bed913c321abafca37286647b5b1dc52ed
   VietMapDirections.swift: d622c98e381281b39f7dcac2b0445ee2f6e1690e
   VietMapNavigation: 9b9322418f72d279c85640ef5353d20235cbbdc4

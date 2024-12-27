@@ -1,5 +1,4 @@
-import 'package:flutter/foundation.dart';
-import 'package:uuid/uuid.dart';
+import 'package:vietmap_automotive_flutter/models/on_click_events.dart';
 
 /// Enum defining different styles of bar buttons in CarPlay.
 enum CPBarButtonStyles {
@@ -12,9 +11,6 @@ enum CPBarButtonStyles {
 
 /// A button object for placement in a navigation bar.
 class CPBarButton {
-  /// Unique id of the object.
-  final String _elementId = const Uuid().v4();
-
   /// The title displayed on the bar button.
   final String? title;
 
@@ -29,11 +25,11 @@ class CPBarButton {
   final CPBarButtonStyles style;
 
   /// Fired when the user taps a bar button.
-  final VoidCallback onPressed;
+  final OnClickEvents onClickEvent;
 
   /// Creates [CPBarButton]
   CPBarButton({
-    required this.onPressed,
+    required this.onClickEvent,
     this.style = CPBarButtonStyles.rounded,
     this.isEnabled = true,
     this.image,
@@ -49,10 +45,10 @@ class CPBarButton {
 
   Map<String, dynamic> toJson() => {
         'isEnabled': isEnabled,
-        '_elementId': _elementId,
         if (title != null) 'title': title,
         if (image != null) 'image': image,
         'style': style.name,
+        'onClickEvent': onClickEvent.name,
       };
 
   /// Creates a copy of this object but with the given fields replaced with new values.
@@ -61,18 +57,14 @@ class CPBarButton {
     String? image,
     bool? isEnabled,
     CPBarButtonStyles? style,
-    VoidCallback? onPressed,
+    OnClickEvents? onClickEvent,
   }) {
     return CPBarButton(
       title: title ?? this.title,
       image: image ?? this.image,
       style: style ?? this.style,
-      onPressed: onPressed ?? this.onPressed,
+      onClickEvent: onClickEvent ?? this.onClickEvent,
       isEnabled: isEnabled ?? this.isEnabled,
     );
-  }
-
-  String get uniqueId {
-    return _elementId;
   }
 }

@@ -1,11 +1,7 @@
-import 'package:flutter/foundation.dart';
-import 'package:uuid/uuid.dart';
+import '/models/on_click_events.dart';
 
 /// A button object for placement in a map.
 class CPMapButton {
-  /// Unique id of the object.
-  final String _elementId = const Uuid().v4();
-
   /// The enabled state of the map button.
   final bool isEnabled;
 
@@ -24,12 +20,12 @@ class CPMapButton {
   /// The image displayed on the focused map button.
   final String? focusedImage;
 
-  /// Fired when the user taps a map button.
-  final VoidCallback onPressed;
+  /// The enum indicating the type of the map button.
+  final OnClickEvents onClickEvent;
 
   /// Creates [CPMapButton]
   CPMapButton({
-    required this.onPressed,
+    required this.onClickEvent,
     this.isEnabled = true,
     this.isHidden = false,
     this.focusedImage,
@@ -40,15 +36,11 @@ class CPMapButton {
 
   Map<String, dynamic> toJson() => {
         'focusedImage': focusedImage,
-        '_elementId': _elementId,
         'isEnabled': isEnabled,
         'darkImage': darkImage,
         'tintColor': tintColor,
         'isHidden': isHidden,
         'image': image,
+        'onClickEvent': onClickEvent.serverValue,
       };
-
-  String get uniqueId {
-    return _elementId;
-  }
 }

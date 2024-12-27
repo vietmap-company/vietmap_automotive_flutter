@@ -16,9 +16,6 @@ class FCPBarButton {
     /// The underlying CPBarButton instance.
     private(set) var _super: CPBarButton?
 
-    /// The unique identifier for the bar button.
-    private(set) var elementId: String
-
     /// The image associated with the bar button (optional).
     private var image: UIImage?
 
@@ -30,6 +27,9 @@ class FCPBarButton {
 
     /// The enabled state of the bar button.
     private var isEnabled: Bool = true
+    
+    /// An enum indicating the event of this bar button
+    private var onClickEvent: String?
 
     // MARK: Initializer
 
@@ -37,16 +37,13 @@ class FCPBarButton {
     ///
     /// - Parameter obj: A dictionary containing information about the bar button.
     init(obj: [String: Any]) {
-        guard let elementIdValue = obj["_elementId"] as? String else {
-            fatalError("Missing required key: _elementId")
-        }
-        elementId = elementIdValue
-
         title = obj["title"] as? String
 
         if let imageName = obj["image"] as? String {
             image = UIImage.dynamicImage(lightImage: imageName)
         }
+        
+        onClickEvent = obj["onClickEvent"] as? String
 
         isEnabled = obj["isEnabled"] as? Bool ?? true
 
@@ -61,16 +58,48 @@ class FCPBarButton {
 
         if let barTitle = title {
             barButton = CPBarButton(title: barTitle, handler: { _ in
-                DispatchQueue.main.async {
-                    // Dispatch an event when the bar button is pressed.
-                    FCPStreamHandlerPlugin.sendEvent(type: FCPChannelTypes.onBarButtonPressed, data: ["elementId": self.elementId])
+                guard let mapTemplate = VietmapAutomotiveFlutterPlugin.getMapViewTemplate()
+                else{
+                    return
+                }
+
+                switch self.onClickEvent{
+                    case FCPChannelTypes.showPanningInterface:
+                        mapTemplate.showPanningInterface(animated: true)
+                    case FCPChannelTypes.dismissPanningInterface:
+                        mapTemplate.dismissPanningInterface(animated: true)
+                    case FCPChannelTypes.zoomInMapView:
+                        mapTemplate.fcpMapViewController?.zoomInMapView()
+                    case FCPChannelTypes.zoomOutMapView:
+                        mapTemplate.fcpMapViewController?.zoomOutMapView()
+                    case FCPChannelTypes.recenterMapView:
+                        mapTemplate.fcpMapViewController?.centerMap()
+
+                    default:
+                        debugPrint("Method not implemented")
                 }
             })
         } else if let barImage = image {
             barButton = CPBarButton(image: barImage, handler: { _ in
-                DispatchQueue.main.async {
-                    // Dispatch an event when the bar button is pressed.
-                    FCPStreamHandlerPlugin.sendEvent(type: FCPChannelTypes.onBarButtonPressed, data: ["elementId": self.elementId])
+                guard let mapTemplate = VietmapAutomotiveFlutterPlugin.getMapViewTemplate()
+                else{
+                    return
+                }
+
+                switch self.onClickEvent{
+                    case FCPChannelTypes.showPanningInterface:
+                        mapTemplate.showPanningInterface(animated: true)
+                    case FCPChannelTypes.dismissPanningInterface:
+                        mapTemplate.dismissPanningInterface(animated: true)
+                    case FCPChannelTypes.zoomInMapView:
+                        mapTemplate.fcpMapViewController?.zoomInMapView()
+                    case FCPChannelTypes.zoomOutMapView:
+                        mapTemplate.fcpMapViewController?.zoomOutMapView()
+                    case FCPChannelTypes.recenterMapView:
+                        mapTemplate.fcpMapViewController?.centerMap()
+
+                    default:
+                        debugPrint("Method not implemented")
                 }
             })
         } else {
