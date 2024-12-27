@@ -67,8 +67,7 @@ class MethodChannelVietmapAutomotiveFlutter
           break;
         case Events.onMapRendered:
           for (var listener in _onMapRenderedListeners) {
-            listener()
-            ;
+            listener();
           }
           break;
         case Events.onStyleLoaded:

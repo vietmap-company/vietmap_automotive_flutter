@@ -11,6 +11,8 @@ jobs:
           uses: subosito/flutter-action@v2
           with:
             flutter-version: '3.24.0'
+        - name: Create .env file
+          run: echo "VIETMAP_API_KEY=YOUR_API_KEY_HERE" >> .env
         - name: Install dependencies
           run: flutter pub get
         - name: Analyze
