@@ -137,30 +137,34 @@ class _MyAppState extends State<MyApp> {
         ),
         body: SizedBox(
           width: double.infinity,
-          child: Column(
-            children: [
-              ElevatedButton(
-                onPressed: () async {
-                  final resp = await _vietmapAutomotiveFlutterPlugin.addMarkers(
-                    markers: [
-                      Marker(
-                          width: 120,
-                          height: 120,
-                          imagePath: 'assets/50.png',
-                          latLng:
-                              const LatLng(lat: 10.762528, lng: 106.653099)),
-                      Marker(
-                          imagePath: 'assets/40.png',
-                          latLng: const LatLng(
-                              lat: 10.759238582476392, lng: 106.67595730119154),
-                          width: 80,
-                          height: 80),
-                    ],
-                  );
-                  _markers.addAll(resp);
-                },
-                child: const Text(
-                  'Add Markers',
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                ElevatedButton(
+                  onPressed: () async {
+                    final resp =
+                        await _vietmapAutomotiveFlutterPlugin.addMarkers(
+                      markers: [
+                        Marker(
+                            width: 120,
+                            height: 120,
+                            imagePath: 'assets/50.png',
+                            latLng:
+                                const LatLng(lat: 10.762528, lng: 106.653099)),
+                        Marker(
+                            imagePath: 'assets/40.png',
+                            latLng: const LatLng(
+                                lat: 10.759238582476392,
+                                lng: 106.67595730119154),
+                            width: 80,
+                            height: 80),
+                      ],
+                    );
+                    _markers.addAll(resp);
+                  },
+                  child: const Text(
+                    'Add Markers',
+                  ),
                 ),
               ),
               const SizedBox(height: 10),

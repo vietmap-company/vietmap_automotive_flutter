@@ -5,4 +5,6 @@ interface IMapController {
     fun zoomOut()
     fun recenter()
     fun overviewRoute()
+    fun clearRoute() : Boolean
+    fun startNavigation()
 }

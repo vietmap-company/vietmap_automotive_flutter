@@ -105,6 +105,19 @@ class MockVietmapAutomotiveFlutterPlatform
       profile = DrivingProfile.drivingTraffic}) {
     throw UnimplementedError();
   }
+
+  @override
+  Future<void> overviewRoute({MapOptions? options}) async {}
+
+  @override
+  Future<bool> clearRoute() {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<bool?> startNavigation({MapOptions? options}) {
+    throw UnimplementedError();
+  }
 }
 
 void main() {
