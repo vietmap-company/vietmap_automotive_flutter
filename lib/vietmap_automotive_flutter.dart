@@ -164,7 +164,11 @@ class VietmapAutomotiveFlutter {
     return await _vietmapAutomotiveFlutterPlatform.removeAllPolygons();
   }
 
-  Future<bool> buildRoute({
+  /// Builds a route with the given [waypoints] and [options].
+  /// Returns a [bool] containing the result of the route building.
+  /// or false if the route is not built successfully.
+  /// The [profile] parameter is optional and defaults to [DrivingProfile.drivingTraffic].
+  Future<bool?> buildRoute({
     required List<LatLng> waypoints,
     MapOptions? options,
     DrivingProfile profile = DrivingProfile.drivingTraffic,
@@ -173,6 +177,34 @@ class VietmapAutomotiveFlutter {
       waypoints: waypoints,
       options: options,
       profile: profile,
+    );
+  }
+
+  /// Starts a free drive with the given [options].
+  /// Returns a [bool] containing the result of the free drive.
+  /// or false if the free drive is not started successfully.
+  Future<void> overviewRoute({
+    MapOptions? options,
+  }) async {
+    return await _vietmapAutomotiveFlutterPlatform.overviewRoute(
+      options: options,
+    );
+  }
+
+  /// Clears the route from the map view on Android Auto and Apple CarPlay.
+  /// Returns a [bool] containing the result of the route clearing.
+  Future<bool?> clearRoute() async {
+    return await _vietmapAutomotiveFlutterPlatform.clearRoute();
+  }
+
+  /// Starts navigation with the given [options].
+  /// Returns a [bool] containing the result of the navigation.
+  /// or false if the navigation is not started successfully.
+  Future<bool?> startNavigation({
+    MapOptions? options,
+  }) async {
+    return await _vietmapAutomotiveFlutterPlatform.startNavigation(
+      options: options,
     );
   }
 

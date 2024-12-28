@@ -8,6 +8,8 @@ import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.PointF
 import android.graphics.drawable.BitmapDrawable
+import android.location.Location
+import android.os.Build
 import android.util.Log
 import androidx.car.app.CarContext
 import androidx.car.app.Screen
@@ -18,10 +20,12 @@ import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.Point
+import com.mapbox.turf.TurfMisc
 import okhttp3.internal.toHexString
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import timber.log.Timber
 import vn.vietmap.androidauto.communicate_interface.IAutomotiveCommunicator
 import vn.vietmap.androidauto.controller_interface.IMapController
 import vn.vietmap.androidauto.helper.VietMapCarSurfaceHelper
@@ -29,16 +33,28 @@ import vn.vietmap.androidauto.helper.VietMapNavigationHelper
 import vn.vietmap.androidauto.models.CurrentCenterPoint
 import vn.vietmap.services.android.navigation.ui.v5.camera.CameraOverviewCancelableCallback
 import vn.vietmap.services.android.navigation.ui.v5.voice.NavigationSpeechPlayer
+import vn.vietmap.services.android.navigation.ui.v5.voice.SpeechAnnouncement
 import vn.vietmap.services.android.navigation.ui.v5.voice.SpeechPlayer
 import vn.vietmap.services.android.navigation.ui.v5.voice.SpeechPlayerProvider
 import vn.vietmap.services.android.navigation.v5.location.engine.LocationEngineProvider
 import vn.vietmap.services.android.navigation.v5.location.replay.ReplayRouteLocationEngine
+import vn.vietmap.services.android.navigation.v5.milestone.Milestone
+import vn.vietmap.services.android.navigation.v5.milestone.MilestoneEventListener
+import vn.vietmap.services.android.navigation.v5.milestone.VoiceInstructionMilestone
 import vn.vietmap.services.android.navigation.v5.navigation.NavigationConstants
+import vn.vietmap.services.android.navigation.v5.navigation.NavigationEventListener
 import vn.vietmap.services.android.navigation.v5.navigation.NavigationMapRoute
 import vn.vietmap.services.android.navigation.v5.navigation.NavigationRoute
 import vn.vietmap.services.android.navigation.v5.navigation.NavigationTimeFormat
 import vn.vietmap.services.android.navigation.v5.navigation.VietmapNavigation
 import vn.vietmap.services.android.navigation.v5.navigation.VietmapNavigationOptions
+import vn.vietmap.services.android.navigation.v5.offroute.OffRoute
+import vn.vietmap.services.android.navigation.v5.offroute.OffRouteListener
+import vn.vietmap.services.android.navigation.v5.route.FasterRouteListener
+import vn.vietmap.services.android.navigation.v5.routeprogress.ProgressChangeListener
+import vn.vietmap.services.android.navigation.v5.routeprogress.RouteProgress
+import vn.vietmap.services.android.navigation.v5.snap.SnapToRoute
+import vn.vietmap.services.android.navigation.v5.utils.RouteUtils
 import vn.vietmap.vietmapandroidautosdk.map.VietMapAndroidAutoSurface
 import vn.vietmap.vietmapsdk.R
 import vn.vietmap.vietmapsdk.annotations.IconFactory
@@ -75,24 +91,25 @@ import java.util.Locale
 class VietMapCarAppScreen(
     carContext: CarContext,
     val mSurfaceRenderer: VietMapAndroidAutoSurface,
-) : Screen(carContext), IMapController {
-
+) : Screen(carContext), IMapController, NavigationEventListener, FasterRouteListener, MilestoneEventListener, OffRouteListener, ProgressChangeListener {
+    private val routeUtils = RouteUtils()
     private var vietmapGL: VietMapGL? = null
     private var mapView: MapView? = null
     private var apikey: String? = null
     private var locationEngine: LocationEngine? = null
     private var locationComponent: LocationComponent? = null
-    private var vietmapNavigation: VietmapNavigation? =  null
-    private var navigationOptions = VietmapNavigationOptions.builder().maxTurnCompletionOffset(30.0).maneuverZoneRadius(40.0)
-        .maximumDistanceOffRoute(50.0).deadReckoningTimeInterval(5.0)
-        .maxManipulatedCourseAngle(25.0).userLocationSnapDistance(20.0).secondsBeforeReroute(3)
-        .enableOffRouteDetection(true).enableFasterRouteDetection(false).snapToRoute(false)
-        .manuallyEndNavigationUponCompletion(false).defaultMilestonesEnabled(true)
-        .minimumDistanceBeforeRerouting(10.0).metersRemainingTillArrival(20.0)
-        .isFromNavigationUi(false).isDebugLoggingEnabled(false)
-        .roundingIncrement(NavigationConstants.ROUNDING_INCREMENT_FIFTY)
-        .timeFormatType(NavigationTimeFormat.NONE_SPECIFIED)
-        .locationAcceptableAccuracyInMetersThreshold(100).build()
+    private var vietmapNavigation: VietmapNavigation? = null
+    private var navigationOptions =
+        VietmapNavigationOptions.builder().maxTurnCompletionOffset(30.0).maneuverZoneRadius(40.0)
+            .maximumDistanceOffRoute(50.0).deadReckoningTimeInterval(5.0)
+            .maxManipulatedCourseAngle(25.0).userLocationSnapDistance(20.0).secondsBeforeReroute(3)
+            .enableOffRouteDetection(true).enableFasterRouteDetection(false).snapToRoute(false)
+            .manuallyEndNavigationUponCompletion(false).defaultMilestonesEnabled(true)
+            .minimumDistanceBeforeRerouting(10.0).metersRemainingTillArrival(20.0)
+            .isFromNavigationUi(false).isDebugLoggingEnabled(false)
+            .roundingIncrement(NavigationConstants.ROUNDING_INCREMENT_FIFTY)
+            .timeFormatType(NavigationTimeFormat.NONE_SPECIFIED)
+            .locationAcceptableAccuracyInMetersThreshold(100).build()
     private var directionsRoutes: List<DirectionsRoute>? = null
     private var navigationMapRoute: NavigationMapRoute? = null
     private var currentRoute: DirectionsRoute? = null
@@ -105,13 +122,19 @@ class VietMapCarAppScreen(
     private val listPolygons: ArrayList<Polygon> = ArrayList()
     private var currentCenterPoint: CurrentCenterPoint? = null
     private lateinit var automotiveCommunicator: IAutomotiveCommunicator
+    private val snapEngine = SnapToRoute()
+    private var routeProgress: RouteProgress? = null
+    private var isRefreshing = false
+    private var isNextTurnHandling = false
+    private var distanceToOffRoute = 30.0
     private var speechPlayer: SpeechPlayer? = null
     private var bitmapDrawable: BitmapDrawable? = null
     private var isPreviewingRoute = false
     private var isOverviewing = false
     private var primaryRouteIndex = 0
     private var isBuildingRoute = false
-    private val vietmapNavigationSurfaceHelper: VietMapCarSurfaceHelper = VietMapCarSurfaceHelper(this, carContext)
+    private val vietmapNavigationSurfaceHelper: VietMapCarSurfaceHelper =
+        VietMapCarSurfaceHelper(this, carContext)
 
     companion object {
 
@@ -193,8 +216,8 @@ class VietMapCarAppScreen(
             }
         )
         mapView = mSurfaceRenderer.getMapView()
-        mapView?.addOnDidFinishRenderingMapListener {
-            isFinished -> if (isFinished) automotiveCommunicator.onMapRendered()
+        mapView?.addOnDidFinishRenderingMapListener { isFinished ->
+            if (isFinished) automotiveCommunicator.onMapRendered()
         }
         vietmapNavigation = VietmapNavigation(
             carContext,
@@ -228,11 +251,11 @@ class VietMapCarAppScreen(
     }
 
 
-    fun addMarker(data: List<Map<String,Any>>) : ArrayList<Long> {
+    fun addMarker(data: List<Map<String, Any>>): ArrayList<Long> {
         val listMarkerId = ArrayList<Long>()
         try {
             data.forEach {
-                try{
+                try {
                     val d = it
                     val latitude = d["lat"] as? Double ?: return@forEach
                     val longitude = d["lng"] as? Double ?: return@forEach
@@ -244,7 +267,8 @@ class VietMapCarAppScreen(
                     val height = d["height"] as? Int
 
                     val iconBitmap = base64Encoded?.let {
-                        val decodedString = android.util.Base64.decode(it, android.util.Base64.DEFAULT)
+                        val decodedString =
+                            android.util.Base64.decode(it, android.util.Base64.DEFAULT)
                         BitmapFactory.decodeByteArray(decodedString, 0, decodedString.size)
                     }
 
@@ -254,8 +278,7 @@ class VietMapCarAppScreen(
                         iconBitmap
                     }
 
-                    val icon = scaledBitmap?.let {
-                        scaledBM->
+                    val icon = scaledBitmap?.let { scaledBM ->
                         IconFactory.getInstance(carContext).fromBitmap(scaledBM)
                     }
 
@@ -267,12 +290,11 @@ class VietMapCarAppScreen(
 
                     val marker = vietmapGL?.addMarker(markerOption)
 
-                    marker?.let {m ->
+                    marker?.let { m ->
                         listMarkerId.add(m.id)
                         listMarkers.add(m)
                     }
-                }
-                catch(e: Exception) {
+                } catch (e: Exception) {
                     e.printStackTrace()
                 }
             }
@@ -284,7 +306,7 @@ class VietMapCarAppScreen(
         }
     }
 
-    fun removeMarker(data: Map<String, Any>) : Boolean {
+    fun removeMarker(data: Map<String, Any>): Boolean {
         val markersIdList = data["markerIds"] as ArrayList<Int>
         try {
             markersIdList.forEach { markerId ->
@@ -304,7 +326,7 @@ class VietMapCarAppScreen(
         }
     }
 
-    fun removeAllMarkers() : Boolean {
+    fun removeAllMarkers(): Boolean {
         try {
             listMarkers.forEach {
                 it.remove()
@@ -316,9 +338,9 @@ class VietMapCarAppScreen(
         }
     }
 
-    fun addPolylines(mapData: Map<String, Any>) : ArrayList<Long> {
+    fun addPolylines(mapData: Map<String, Any>): ArrayList<Long> {
         val polylineIds = ArrayList<Long>()
-        try{
+        try {
             val polylineList = mapData["polylines"] as List<Map<String, Any>>
             polylineList.forEach { data ->
                 try {
@@ -329,7 +351,8 @@ class VietMapCarAppScreen(
                         val lng = it["lng"] as Double
                         latLngList.add(LatLng(lat, lng))
                     }
-                    val polylineColor = data["color"] as? String? ?: "#${R.color.vietmap_blue.toHexString()}"
+                    val polylineColor =
+                        data["color"] as? String? ?: "#${R.color.vietmap_blue.toHexString()}"
 
                     val polylineOptions = PolylineOptions().let {
                         it.addAll(latLngList)
@@ -344,20 +367,18 @@ class VietMapCarAppScreen(
                         polylineIds.add(p.id)
                         listPolylines.add(p)
                     }
-                }
-                catch (e: Exception) {
+                } catch (e: Exception) {
                     e.printStackTrace()
                 }
             }
             return polylineIds
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             e.printStackTrace()
             return polylineIds
         }
     }
 
-    fun removePolyline(data: Map<String, Any>) : Boolean {
+    fun removePolyline(data: Map<String, Any>): Boolean {
         val polylineIds = data["polylineIds"] as ArrayList<Long>
         try {
             val temp = ArrayList<Polyline>()
@@ -377,7 +398,7 @@ class VietMapCarAppScreen(
         }
     }
 
-    fun removeAllPolylines() : Boolean {
+    fun removeAllPolylines(): Boolean {
         try {
             listPolylines.forEach {
                 it.remove()
@@ -389,9 +410,9 @@ class VietMapCarAppScreen(
         }
     }
 
-    fun addPolygons(mapData: Map<String, Any>) : ArrayList<Long> {
+    fun addPolygons(mapData: Map<String, Any>): ArrayList<Long> {
         val polygonIds = ArrayList<Long>()
-        try{
+        try {
             val polygonList = mapData["polygons"] as List<Map<String, Any>>
             polygonList.forEach { data ->
                 try {
@@ -416,8 +437,10 @@ class VietMapCarAppScreen(
                         holeLatLngList.add(holeList)
                     }
 
-                    val fillColor = data["fillColor"] as? String? ?: "#${R.color.vietmap_blue.toHexString()}"
-                    val strokeColor = data["strokeColor"] as? String? ?: "#${R.color.vietmap_blue.toHexString()}"
+                    val fillColor =
+                        data["fillColor"] as? String? ?: "#${R.color.vietmap_blue.toHexString()}"
+                    val strokeColor =
+                        data["strokeColor"] as? String? ?: "#${R.color.vietmap_blue.toHexString()}"
 
                     val polygonOptions = PolygonOptions().let {
                         it.addAll(pointLatLngList)
@@ -433,20 +456,18 @@ class VietMapCarAppScreen(
                         polygonIds.add(p.id)
                         listPolygons.add(p)
                     }
-                }
-                catch (e: Exception) {
+                } catch (e: Exception) {
                     e.printStackTrace()
                 }
             }
             return polygonIds
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             e.printStackTrace()
             return polygonIds
         }
     }
 
-    fun removePolygon(data: Map<String, Any>) : Boolean {
+    fun removePolygon(data: Map<String, Any>): Boolean {
         val polygonIds = data["polygonIds"] as ArrayList<Long>
         try {
             val temp = ArrayList<Polygon>()
@@ -466,7 +487,7 @@ class VietMapCarAppScreen(
         }
     }
 
-    fun removeAllPolygons() : Boolean {
+    fun removeAllPolygons(): Boolean {
         try {
             listPolygons.forEach {
                 it.remove()
@@ -478,17 +499,17 @@ class VietMapCarAppScreen(
         }
     }
 
-    fun buildRoute(arguments: Map<*, *>) : Boolean {
+    fun buildRoute(arguments: Map<*, *>): Boolean {
         isNavigationCanceled = false
         isNavigationInProgress = false
 
         setOptions(arguments)
 
-        if(isMapReady){
+        if (isMapReady) {
             wayPoints.clear()
-            val wayPointsList = arguments["wayPoints"] as HashMap<*,*>
-            for(item in wayPointsList){
-                val point = item.value as HashMap<*,*>
+            val wayPointsList = arguments["wayPoints"] as HashMap<*, *>
+            for (item in wayPointsList) {
+                val point = item.value as HashMap<*, *>
                 val latitude = point["Latitude"] as Double
                 val longitude = point["Longitude"] as Double
                 wayPoints.add(Point.fromLngLat(longitude, latitude))
@@ -497,12 +518,12 @@ class VietMapCarAppScreen(
             val originWayPoint = wayPoints[0]
             originPoint = Point.fromLngLat(originWayPoint.longitude(), originWayPoint.latitude())
             val destinationWayPoint = wayPoints[1]
-            destinationPoint = Point.fromLngLat(destinationWayPoint.longitude(), destinationWayPoint.latitude())
+            destinationPoint =
+                Point.fromLngLat(destinationWayPoint.longitude(), destinationWayPoint.latitude())
             fetchRouteWithBearing(false, profile)
 
             return true
-        }
-        else{
+        } else {
             return false
         }
     }
@@ -605,13 +626,12 @@ class VietMapCarAppScreen(
 
     override fun recenter() {
         isOverviewing = false
-        if(currentCenterPoint != null) {
+        if (currentCenterPoint != null) {
             moveCamera(
                 LatLng(currentCenterPoint!!.latitude, currentCenterPoint!!.longitude),
                 currentCenterPoint!!.bearing
             )
-        }
-        else{
+        } else {
             vietmapGL?.locationComponent?.lastKnownLocation?.let {
                 moveCamera(
                     LatLng(it.latitude, it.longitude),
@@ -623,10 +643,69 @@ class VietMapCarAppScreen(
 
     override fun overviewRoute() {
         isOverviewing = true
-        if(currentRoute != null){
-            val routePoints: List<Point> = currentRoute?.routeOptions()?.coordinates() as List<Point>
+        if (currentRoute != null) {
+            val routePoints: List<Point> =
+                currentRoute?.routeOptions()?.coordinates() as List<Point>
             animateVietmapGLForRouteOverview(padding, routePoints)
         }
+    }
+
+    override fun clearRoute(): Boolean {
+        if (navigationMapRoute != null) {
+            navigationMapRoute?.removeRoute()
+        }
+        currentRoute = null
+        vietmapNavigationSurfaceHelper.initNavigationTemplate()
+        invalidate()
+        recenter()
+        return true
+    }
+
+    fun startNavigation(arguments: Map<*, *>?): Boolean {
+        if (arguments != null) setOptions(arguments)
+
+        startNavigation()
+
+        return currentRoute != null
+    }
+
+    override fun startNavigation() {
+        tilt = 45.0
+        zoom = 19.0
+        isOverviewing = false
+        isNavigationCanceled = false
+        vietmapGL?.locationComponent?.cameraMode = CameraMode.TRACKING_GPS_NORTH
+
+        if (currentRoute != null) {
+            if (simulateRoute) {
+                val mockLocationEngine = ReplayRouteLocationEngine()
+                mockLocationEngine.assign(currentRoute)
+                vietmapNavigation?.locationEngine = mockLocationEngine
+            } else {
+                locationEngine?.let {
+                    vietmapNavigation?.locationEngine = it
+                }
+            }
+            isRunning = true
+            vietmapGL?.locationComponent?.locationEngine = null
+            vietmapNavigation?.addNavigationEventListener(this)
+            vietmapNavigation?.addFasterRouteListener(this)
+            vietmapNavigation?.addMilestoneEventListener(this)
+            vietmapNavigation?.addOffRouteListener(this)
+            vietmapNavigation?.addProgressChangeListener(this)
+            vietmapNavigation?.snapEngine = snapEngine
+            navigationMapRoute!!.showAlternativeRoutes(true)
+            currentRoute?.let {
+                isNavigationInProgress = true
+                vietmapNavigation?.startNavigation(currentRoute!!)
+                recenter()
+            }
+        }
+    }
+
+    fun overviewRoute(arguments: Map<*, *>?) {
+        if (arguments != null) setOptions(arguments)
+        overviewRoute()
     }
 
     private fun moveCamera(location: LatLng, bearing: Float?) {
@@ -642,9 +721,9 @@ class VietMapCarAppScreen(
         )
     }
 
-    private fun fetchRouteWithBearing(isStartNavigation: Boolean, profile: String){
+    private fun fetchRouteWithBearing(isStartNavigation: Boolean, profile: String) {
         isPreviewingRoute = true
-        if(!checkPermission()) return
+        if (!checkPermission()) return
         locationEngine?.getLastLocation(object : LocationEngineCallback<LocationEngineResult> {
             override fun onSuccess(result: LocationEngineResult) {
 
@@ -705,7 +784,7 @@ class VietMapCarAppScreen(
 
                 //show multiple route to map
                 if (response.body()!!.routes().size > 1) {
-                    navigationMapRoute?.let{
+                    navigationMapRoute?.let {
                         it.addRoutes(directionsRoutes!!)
                         it.showAlternativeRoutes(true)
                     }
@@ -722,9 +801,9 @@ class VietMapCarAppScreen(
                 vietmapNavigationSurfaceHelper.updateOnRouteBuiltTemplate()
                 invalidate()
                 //Start Navigation again from new Point, if it was already in Progress
-//                if (isNavigationInProgress || isStartNavigation) {
-//                    startNavigation()
-//                }
+                if (isNavigationInProgress || isStartNavigation) {
+                    startNavigation()
+                }
             }
 
             override fun onFailure(call: Call<DirectionsResponse?>, throwable: Throwable) {
@@ -791,4 +870,230 @@ class VietMapCarAppScreen(
         val bitmap: Bitmap = BitmapFactory.decodeByteArray(binaryData, 0, binaryData.size)
         return BitmapDrawable(carContext.resources, bitmap)
     }
+
+    override fun onRunning(running: Boolean) {
+        /// On running
+    }
+
+    override fun fasterRouteFound(p0: DirectionsRoute?) {
+        /// Faster route found
+    }
+
+    override fun onMilestoneEvent(
+        routeProgress: RouteProgress?,
+        instruction: String?,
+        milestone: Milestone?
+    ) {
+        if (voiceInstructionsEnabled) {
+            playVoiceAnnouncement(milestone)
+        }
+        if (routeProgress == null || milestone == null) return
+        if (routeUtils.isArrivalEvent(routeProgress, milestone) && isNavigationInProgress) {
+            vietmapGL?.locationComponent?.locationEngine = locationEngine
+            isPreviewingRoute = false
+            finishNavigation()
+        }
+        if (!isNavigationCanceled) {
+            Log.d("Milestone", "Milestone: $milestone")
+        }
+    }
+
+    private fun playVoiceAnnouncement(milestone: Milestone?) {
+        if (milestone is VoiceInstructionMilestone) {
+            val announcement = SpeechAnnouncement.builder()
+                .voiceInstructionMilestone(milestone as VoiceInstructionMilestone?).build()
+            speechPlayer!!.play(announcement)
+        }
+    }
+
+
+    override fun userOffRoute(location: Location) {
+        if (checkIfUserOffRoute(location)) {
+            speechPlayer?.onOffRoute()
+            doOnNewRoute(Point.fromLngLat(location.longitude, location.latitude))
+        }
+    }
+
+    private fun doOnNewRoute(offRoutePoint: Point?) {
+        if (!isBuildingRoute) {
+            isBuildingRoute = true
+
+            offRoutePoint?.let {
+
+                finishNavigation(isOffRouted = true)
+
+                moveCamera(LatLng(it.latitude(), it.longitude()), null)
+
+//                PluginUtilities.sendEvent(
+//                    VietMapEvents.USER_OFF_ROUTE, VietMapLocation(
+//                        latitude = it.latitude(), longitude = it.longitude()
+//                    ).toString()
+//                )
+
+            }
+
+//            PluginUtilities.sendEvent(
+//                VietMapEvents.USER_OFF_ROUTE, VietMapLocation(
+//                    latitude = offRoutePoint?.latitude(), longitude = offRoutePoint?.longitude()
+//                ).toString()
+//            )
+
+            originPoint = offRoutePoint
+            isNavigationInProgress = true
+            fetchRouteWithBearing(false, profile)
+        }
+    }
+
+    private fun finishNavigation(isOffRouted: Boolean = false) {
+        bearing = 0.0
+        tilt = 0.0
+        isNavigationCanceled = true
+
+        if (!isOffRouted) {
+            isNavigationInProgress = false
+        }
+
+        if (currentRoute != null) {
+            isRunning = false
+            currentCenterPoint = null
+            vietmapNavigation?.stopNavigation()
+            vietmapNavigation?.removeFasterRouteListener(this)
+            vietmapNavigation?.removeMilestoneEventListener(this)
+            vietmapNavigation?.removeNavigationEventListener(this)
+            vietmapNavigation?.removeOffRouteListener(this)
+            vietmapNavigation?.removeProgressChangeListener(this)
+            clearRoute()
+            vietmapNavigationSurfaceHelper.initNavigationTemplate()
+            invalidate()
+            recenter()
+        }
+    }
+
+
+
+    private fun checkIfUserOffRoute(location: Location): Boolean {
+        if (routeProgress?.currentStepPoints() != null) {
+            val snapLocation: Location = snapEngine.getSnappedLocation(location, routeProgress)
+            val distance: Double =
+                VietMapNavigationHelper.calculateDistanceBetween2Point(location, snapLocation)
+            return distance > this.distanceToOffRoute && checkIfUserIsDrivingToOtherRoute(location)
+        }
+        return false
+    }
+
+    private fun checkIfUserIsDrivingToOtherRoute(location: Location): Boolean {
+        directionsRoutes?.forEach {
+            //get list point
+            snapLocationLatLng(
+                location,
+                it.routeOptions()?.coordinates() as List<Point>
+            )?.let { snapLocation ->
+                val distance: Double = VietMapNavigationHelper.calculateDistanceBetween2Point(location, snapLocation)
+                if (distance < 30) {
+                    if (it != currentRoute) {
+                        currentRoute = it
+                        currentRoute?.toJson()?.let { it1 ->
+//                            PluginUtilities.sendEvent(
+//                                VietMapEvents.ON_NEW_ROUTE_SELECTED,
+//                                it1
+//                            )
+                            return false
+                        }
+                    }
+
+                }
+            }
+        }
+        return true
+    }
+
+    private fun snapLocationLatLng(location: Location, stepCoordinates: List<Point>): Location? {
+        val snappedLocation = Location(location)
+        val locationToPoint = Point.fromLngLat(location.longitude, location.latitude)
+        if (stepCoordinates.size > 1) {
+            val feature = TurfMisc.nearestPointOnLine(locationToPoint, stepCoordinates)
+            val point = feature.geometry() as Point?
+            snappedLocation.longitude = point!!.longitude()
+            snappedLocation.latitude = point.latitude()
+        }
+        return snappedLocation
+    }
+
+    override fun onProgressChange(location: Location?, routeProgress: RouteProgress?) {
+        var currentSpeed = location?.speed
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            currentSpeed = location?.speedAccuracyMetersPerSecond
+        }
+        if (!isNavigationCanceled) {
+            try {
+                val noRoutes: Boolean = directionsRoutes?.isEmpty() ?: true
+                if (primaryRouteIndex >= (directionsRoutes?.size ?: 0)) {
+                    primaryRouteIndex = directionsRoutes?.size?.minus(1) ?: 0
+                }
+                val newCurrentRoute: Boolean = !routeProgress!!.directionsRoute()
+                    .equals(directionsRoutes?.get(primaryRouteIndex))
+                val isANewRoute: Boolean = noRoutes || newCurrentRoute
+                if (!isANewRoute) {
+                    distanceRemaining = routeProgress.distanceRemaining()
+                    durationRemaining = routeProgress.durationRemaining()
+
+                    if (!isBuildingRoute) {
+                        val snappedLocation: Location =
+                            snapEngine.getSnappedLocation(location, routeProgress)
+
+                        currentCenterPoint =
+                            CurrentCenterPoint(
+                                snappedLocation.latitude,
+                                snappedLocation.longitude,
+                                snappedLocation.bearing
+                            )
+                        if (!isOverviewing) {
+                            this.routeProgress = routeProgress
+                            if (currentSpeed!! > 0) {
+                                animateBuildRoute = false
+                                moveCamera(
+                                    LatLng(snappedLocation.latitude, snappedLocation.longitude),
+                                    snappedLocation.bearing
+                                )
+                            }
+                        }
+
+                        vietmapGL?.locationComponent?.forceLocationUpdate(snappedLocation)
+                    }
+                    if (!isRefreshing) {
+                        isRefreshing = true
+                    }
+                }
+
+                handleProgressChange(routeProgress, location!!)
+            } catch (e: java.lang.Exception) {
+                Log.e("onProgressChange", e.message.toString())
+                e.printStackTrace()
+            }
+        }
+    }
+
+    private fun handleProgressChange(routeProgress: RouteProgress, location: Location) {
+        if (location.speed < 1) return
+
+        val distanceRemainingToNextTurn =
+            routeProgress.currentLegProgress()?.currentStepProgress()?.distanceRemaining()
+        if (distanceRemainingToNextTurn != null && distanceRemainingToNextTurn < 30) {
+            isNextTurnHandling = true
+            val resetPosition: CameraPosition =
+                CameraPosition.Builder().tilt(0.0).zoom(17.0).build()
+            val cameraUpdate = CameraUpdateFactory.newCameraPosition(resetPosition)
+            vietmapGL?.animateCamera(
+                cameraUpdate, 1000
+            )
+        } else {
+            if (routeProgress.currentLegProgress().currentStepProgress()
+                    .distanceTraveled() > 30 && !isOverviewing
+            ) {
+                isNextTurnHandling = false
+                recenter()
+            }
+        }
+    }
+
 }

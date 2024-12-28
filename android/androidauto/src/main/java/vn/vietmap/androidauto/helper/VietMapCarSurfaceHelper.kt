@@ -16,17 +16,19 @@ class VietMapCarSurfaceHelper(
     private val mapController: IMapController,
     private val carContext: Context,
     ) {
-    private var navigationTemplate: NavigationTemplate.Builder = NavigationTemplate.Builder()
-    private var actionStrip: ActionStrip.Builder = ActionStrip.Builder()
-    private var mapActionStrip: ActionStrip.Builder = ActionStrip.Builder()
+    private lateinit var navigationTemplate: NavigationTemplate.Builder
+    private lateinit var actionStrip: ActionStrip.Builder
+    private lateinit var mapActionStrip: ActionStrip.Builder
 
     init {
         initNavigationTemplate()
     }
 
-    private fun initNavigationTemplate() {
+    fun initNavigationTemplate() {
+        navigationTemplate = NavigationTemplate.Builder()
         navigationTemplate.setBackgroundColor(CarColor.SECONDARY)
 
+        actionStrip = ActionStrip.Builder()
         // Set the action strip.
         actionStrip.addAction(
             Action.Builder()
@@ -45,6 +47,7 @@ class VietMapCarSurfaceHelper(
 
         navigationTemplate.setActionStrip(actionStrip.build())
 
+        mapActionStrip = ActionStrip.Builder()
         // Set the map action strip
         mapActionStrip.addAction(
             Action.Builder(Action.PAN).build()
@@ -93,7 +96,7 @@ class VietMapCarSurfaceHelper(
             Action.Builder()
                 .setTitle("Bắt đầu")
                 .setOnClickListener {
-                    // TODO: Start navigation
+                    mapController.startNavigation()
                 }
                 .build()
         ).addAction(

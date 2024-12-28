@@ -327,7 +327,7 @@ class MethodChannelVietmapAutomotiveFlutter
   /// The waypoints must not have more than 3 stops on iOS.
   /// The options must have a valid profile.
   @override
-  Future<bool> buildRoute({
+  Future<bool?> buildRoute({
     required List<LatLng> waypoints,
     MapOptions? options,
     DrivingProfile profile = DrivingProfile.drivingTraffic,
@@ -359,5 +359,34 @@ class MethodChannelVietmapAutomotiveFlutter
 
     args['profile'] = profile.getValue();
     return await methodChannel.invokeMethod(Events.buildRoute, args);
+  }
+
+  /// Overview the current selected route.
+  @override
+  Future<void> overviewRoute({
+    MapOptions? options,
+  }) async {
+    Map<String, dynamic>? args;
+    if (options != null) args = options.toMap();
+
+    await methodChannel.invokeMethod(Events.overviewRoute, args);
+  }
+
+  /// Clear the current route from the map view on Android Auto and Apple CarPlay.
+  /// Returns a [bool] containing the result of the route clearing.
+  @override
+  Future<bool?> clearRoute() async {
+    return await methodChannel.invokeMethod(Events.clearRoute);
+  }
+
+  /// Start navigation with the given options.
+  /// Returns a [bool] containing the result of the navigation.
+  /// or null if the navigation is not started successfully.
+  @override
+  Future<bool?> startNavigation({MapOptions? options}) async {
+    Map<String, dynamic>? args;
+    if (options != null) args = options.toMap();
+
+    return await methodChannel.invokeMethod(Events.startNavigation, args);
   }
 }

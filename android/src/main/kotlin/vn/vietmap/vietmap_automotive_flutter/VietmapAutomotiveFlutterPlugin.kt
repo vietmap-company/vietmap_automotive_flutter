@@ -137,6 +137,19 @@ class VietmapAutomotiveFlutterPlugin: FlutterPlugin, MethodCallHandler, Lifecycl
                 val isRouteBuilt = vietmapCarApp?.buildRoute(data)
                 result.success(isRouteBuilt)
             }
+            VietmapAutomotiveEvent.OVERVIEW_ROUTE.nameValue -> {
+                val data = call.arguments as? Map<*, *>
+                vietmapCarApp?.overviewRoute(data)
+            }
+            VietmapAutomotiveEvent.CLEAR_ROUTE.nameValue -> {
+                val clearRouteSuccessfully = vietmapCarApp?.clearRoute()
+                result.success(clearRouteSuccessfully)
+            }
+            VietmapAutomotiveEvent.START_NAVIGATION.nameValue -> {
+                val data = call.arguments as? Map<*, *>
+                val startNavigationSuccessfully = vietmapCarApp?.startNavigation(data)
+                result.success(startNavigationSuccessfully)
+            }
             else -> {
               result.notImplemented()
             }

@@ -131,137 +131,163 @@ class _MyAppState extends State<MyApp> {
         ),
         body: SizedBox(
           width: double.infinity,
-          child: Column(
-            children: [
-              ElevatedButton(
-                onPressed: () async {
-                  final resp = await _vietmapAutomotiveFlutterPlugin.addMarkers(
-                    markers: [
-                      Marker(
-                          width: 120,
-                          height: 120,
-                          imagePath: 'assets/50.png',
-                          latLng:
-                              const LatLng(lat: 10.762528, lng: 106.653099)),
-                      Marker(
-                          imagePath: 'assets/40.png',
-                          latLng: const LatLng(
-                              lat: 10.759238582476392, lng: 106.67595730119154),
-                          width: 80,
-                          height: 80),
-                    ],
-                  );
-                  _markers.addAll(resp);
-                },
-                child: const Text(
-                  'Add Markers',
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                ElevatedButton(
+                  onPressed: () async {
+                    final resp =
+                        await _vietmapAutomotiveFlutterPlugin.addMarkers(
+                      markers: [
+                        Marker(
+                            width: 120,
+                            height: 120,
+                            imagePath: 'assets/50.png',
+                            latLng:
+                                const LatLng(lat: 10.762528, lng: 106.653099)),
+                        Marker(
+                            imagePath: 'assets/40.png',
+                            latLng: const LatLng(
+                                lat: 10.759238582476392,
+                                lng: 106.67595730119154),
+                            width: 80,
+                            height: 80),
+                      ],
+                    );
+                    _markers.addAll(resp);
+                  },
+                  child: const Text(
+                    'Add Markers',
+                  ),
                 ),
-              ),
-              const SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: () async {
-                  final resp =
-                      await _vietmapAutomotiveFlutterPlugin.addPolylines(
-                    polylines: [
-                      Polyline(
-                        points: [
-                          const LatLng(lat: 10.762528, lng: 106.653099),
-                          const LatLng(lat: 10.762528, lng: 106.753099),
-                          const LatLng(lat: 10.57234, lng: 106.853099),
-                        ],
-                        width: 6,
-                      ),
-                    ],
-                  );
-                  _polylines.addAll(resp);
-                },
-                child: const Text('Add Polyline'),
-              ),
-              const SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: () async {
-                  final resp =
-                      await _vietmapAutomotiveFlutterPlugin.addPolygons(
-                    polygons: [
-                      Polygon(
-                        points: [
-                          const LatLng(lat: 10.762528, lng: 106.653099),
-                          const LatLng(lat: 10.762528, lng: 106.753099),
-                          const LatLng(lat: 10.57234, lng: 106.853099),
-                        ],
-                        fillColor: Colors.red,
-                      ),
-                    ],
-                  );
-                  _polygons.addAll(resp);
-                },
-                child: const Text('Add Polygon'),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                'Map Click: ${_latLng != null ? 'Lat: ${_latLng!.lat}, Lng: ${_latLng!.lng}' : 'Not Clicked'}',
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 10),
-              Text(
-                'Map Ready: $_isMapReady',
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 10),
-              Text(
-                'Map Rendered: $_isMapRendered',
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 10),
-              Text(
-                'Style Loaded: $_isStyleLoaded',
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: () {
-                  _vietmapAutomotiveFlutterPlugin
-                      .removeMapClickListener(customizeOnMapClick);
-                },
-                child: const Text('Remove onMapClick Listener'),
-              ),
-              const SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: () {
-                  _vietmapAutomotiveFlutterPlugin
-                      .removeMapReadyListener(customizeOnMapReady);
-                },
-                child: const Text('Remove onMapReady Listener'),
-              ),
-              const SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: () {
-                  _vietmapAutomotiveFlutterPlugin
-                      .removeMapRenderedListener(customizeOnMapRendered);
-                },
-                child: const Text('Remove onMapRendered Listener'),
-              ),
-              const SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: () {
-                  _vietmapAutomotiveFlutterPlugin
-                      .removeStyleLoadedListener(customizeOnStyleLoaded);
-                },
-                child: const Text('Remove onStyleLoaded Listener'),
-              ),
-              const SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: () {
-                  _vietmapAutomotiveFlutterPlugin.buildRoute(
-                    waypoints: [
-                      const LatLng(lat: 10.762528, lng: 106.653099),
-                      const LatLng(lat: 10.762528, lng: 106.753099),
-                    ],
-                  );
-                },
-                child: const Text('Build Route'),
-              ),
-            ],
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: () async {
+                    final resp =
+                        await _vietmapAutomotiveFlutterPlugin.addPolylines(
+                      polylines: [
+                        Polyline(
+                          points: [
+                            const LatLng(lat: 10.762528, lng: 106.653099),
+                            const LatLng(lat: 10.762528, lng: 106.753099),
+                            const LatLng(lat: 10.57234, lng: 106.853099),
+                          ],
+                          width: 6,
+                        ),
+                      ],
+                    );
+                    _polylines.addAll(resp);
+                  },
+                  child: const Text('Add Polyline'),
+                ),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: () async {
+                    final resp =
+                        await _vietmapAutomotiveFlutterPlugin.addPolygons(
+                      polygons: [
+                        Polygon(
+                          points: [
+                            const LatLng(lat: 10.762528, lng: 106.653099),
+                            const LatLng(lat: 10.762528, lng: 106.753099),
+                            const LatLng(lat: 10.57234, lng: 106.853099),
+                          ],
+                          fillColor: Colors.red,
+                        ),
+                      ],
+                    );
+                    _polygons.addAll(resp);
+                  },
+                  child: const Text('Add Polygon'),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  'Map Click: ${_latLng != null ? 'Lat: ${_latLng!.lat}, Lng: ${_latLng!.lng}' : 'Not Clicked'}',
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  'Map Ready: $_isMapReady',
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  'Map Rendered: $_isMapRendered',
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  'Style Loaded: $_isStyleLoaded',
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: () {
+                    _vietmapAutomotiveFlutterPlugin
+                        .removeMapClickListener(customizeOnMapClick);
+                  },
+                  child: const Text('Remove onMapClick Listener'),
+                ),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: () {
+                    _vietmapAutomotiveFlutterPlugin
+                        .removeMapReadyListener(customizeOnMapReady);
+                  },
+                  child: const Text('Remove onMapReady Listener'),
+                ),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: () {
+                    _vietmapAutomotiveFlutterPlugin
+                        .removeMapRenderedListener(customizeOnMapRendered);
+                  },
+                  child: const Text('Remove onMapRendered Listener'),
+                ),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: () {
+                    _vietmapAutomotiveFlutterPlugin
+                        .removeStyleLoadedListener(customizeOnStyleLoaded);
+                  },
+                  child: const Text('Remove onStyleLoaded Listener'),
+                ),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: () async {
+                    await _vietmapAutomotiveFlutterPlugin.buildRoute(
+                      waypoints: [
+                        const LatLng(lat: 10.762528, lng: 106.653099),
+                        const LatLng(lat: 10.760235003798165, lng: 106.68223947304341),
+                      ],
+                    );
+                  },
+                  child: const Text('Build Route'),
+                ),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: () async {
+                    await _vietmapAutomotiveFlutterPlugin.overviewRoute();
+                  },
+                  child: const Text('Overview Route'),
+                ),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: () async {
+                    await _vietmapAutomotiveFlutterPlugin.clearRoute();
+                  },
+                  child: const Text('Clear Routes'),
+                ),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: () async {
+                    await _vietmapAutomotiveFlutterPlugin.startNavigation();
+                  },
+                  child: const Text('Start Navigation'),
+                ),
+                const SizedBox(height: 10),
+              ],
+            ),
           ),
         ),
         floatingActionButton: Column(

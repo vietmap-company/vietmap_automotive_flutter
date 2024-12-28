@@ -154,10 +154,30 @@ abstract class VietmapAutomotiveFlutterPlatform extends PlatformInterface {
 
   /// Builds a route with the given waypoints and options.
   /// Returns a boolean value indicating whether the route has been built successfully.
-  Future<bool> buildRoute(
+  Future<bool?> buildRoute(
       {required List<LatLng> waypoints,
       MapOptions? options,
       DrivingProfile profile = DrivingProfile.drivingTraffic}) {
     throw UnimplementedError('buildRoute() has not been implemented.');
+  }
+
+  /// Overview the current selected route.
+  Future<void> overviewRoute({
+    MapOptions? options,
+  }) {
+    throw UnimplementedError('overviewRoute() has not been implemented.');
+  }
+
+  /// Clear the routes from map view
+  /// Returns a boolean value indicating whether the routes have been cleared successfully.
+  Future<bool?> clearRoute() {
+    throw UnimplementedError('clearRoute() has not been implemented.');
+  }
+
+  /// Start navigation with the given options.
+  /// Returns a boolean value indicating whether the navigation has been started successfully.
+  /// or null if the navigation is not started successfully.
+  Future<bool?> startNavigation({MapOptions? options}) {
+    throw UnimplementedError('startNavigation() has not been implemented.');
   }
 }
