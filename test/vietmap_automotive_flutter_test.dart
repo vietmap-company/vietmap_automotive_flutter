@@ -1,5 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:vietmap_automotive_flutter/models/latlng.dart';
 import 'package:vietmap_automotive_flutter/models/marker.dart';
+import 'package:vietmap_automotive_flutter/models/navmode.dart';
+import 'package:vietmap_automotive_flutter/models/options.dart';
 import 'package:vietmap_automotive_flutter/models/polygon.dart';
 import 'package:vietmap_automotive_flutter/models/polyline.dart';
 import 'package:vietmap_automotive_flutter/vietmap_automotive_flutter.dart';
@@ -94,6 +97,14 @@ class MockVietmapAutomotiveFlutterPlatform
 
   @override
   void removeOnStyleLoadedListener(Function() listener) {}
+
+  @override
+  Future<bool> buildRoute(
+      {required List<LatLng> waypoints,
+      MapOptions? options,
+      profile = DrivingProfile.drivingTraffic}) {
+    throw UnimplementedError();
+  }
 }
 
 void main() {

@@ -4,11 +4,15 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:vietmap_automotive_flutter/models/bar_button.dart';
+import 'package:vietmap_automotive_flutter/models/latlng.dart';
 import 'package:vietmap_automotive_flutter/models/map_button.dart';
 import 'package:vietmap_automotive_flutter/models/marker.dart';
+import 'package:vietmap_automotive_flutter/models/navmode.dart';
 import 'package:vietmap_automotive_flutter/models/on_click_events.dart';
+import 'package:vietmap_automotive_flutter/models/options.dart';
 import 'package:vietmap_automotive_flutter/models/polygon.dart';
 import 'package:vietmap_automotive_flutter/models/polyline.dart';
+import 'package:vietmap_automotive_flutter/utils/extensions.dart';
 
 import 'models/events.dart';
 import 'models/map_template.dart';
@@ -317,5 +321,43 @@ class MethodChannelVietmapAutomotiveFlutter
     return await methodChannel.invokeMethod<bool>(
       Events.removeAllPolygons,
     );
+  }
+
+  /// Build a route with the given waypoints and options.
+  /// The waypoints must not have more than 3 stops on iOS.
+  /// The options must have a valid profile.
+  @override
+  Future<bool> buildRoute({
+    required List<LatLng> waypoints,
+    MapOptions? options,
+    DrivingProfile profile = DrivingProfile.drivingTraffic,
+  }) async {
+    assert(waypoints.length > 1);
+    if (Platform.isIOS && waypoints.length > 3 && options?.mode != null) {
+      assert(options!.mode != MapNavigationMode.drivingWithTraffic,
+          "Error: Cannot use drivingWithTraffic Mode when you have more than 3 Stops");
+    }
+    List<Map<String, Object?>> pointList = [];
+
+    for (int i = 0; i < waypoints.length; i++) {
+      var latLng = waypoints[i];
+
+      final pointMap = <String, dynamic>{
+        "Order": i,
+        "Name": i.toString(),
+        "Latitude": latLng.lat,
+        "Longitude": latLng.lng,
+      };
+      pointList.add(pointMap);
+    }
+    var i = 0;
+    var wayPointMap = {for (var e in pointList) i++: e};
+
+    Map<String, dynamic> args = <String, dynamic>{};
+    if (options != null) args = options.toMap();
+    args["wayPoints"] = wayPointMap;
+
+    args['profile'] = profile.getValue();
+    return await methodChannel.invokeMethod(Events.buildRoute, args);
   }
 }

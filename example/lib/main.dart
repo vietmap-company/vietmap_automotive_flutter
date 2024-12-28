@@ -249,6 +249,18 @@ class _MyAppState extends State<MyApp> {
                 },
                 child: const Text('Remove onStyleLoaded Listener'),
               ),
+              const SizedBox(height: 10),
+              ElevatedButton(
+                onPressed: () {
+                  _vietmapAutomotiveFlutterPlugin.buildRoute(
+                    waypoints: [
+                      const LatLng(lat: 10.762528, lng: 106.653099),
+                      const LatLng(lat: 10.762528, lng: 106.753099),
+                    ],
+                  );
+                },
+                child: const Text('Build Route'),
+              ),
             ],
           ),
         ),

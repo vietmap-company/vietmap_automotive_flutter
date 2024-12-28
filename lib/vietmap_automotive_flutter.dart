@@ -1,6 +1,9 @@
 import 'package:vietmap_automotive_flutter/models/marker.dart';
 import 'package:vietmap_automotive_flutter/models/polyline.dart';
 
+import 'models/latlng.dart';
+import 'models/navmode.dart';
+import 'models/options.dart';
 import 'models/polygon.dart';
 import 'vietmap_automotive_flutter_platform_interface.dart';
 
@@ -159,6 +162,18 @@ class VietmapAutomotiveFlutter {
   /// Returns a [bool] containing the result of the removal.
   Future<bool?> removeAllPolygons() async {
     return await _vietmapAutomotiveFlutterPlatform.removeAllPolygons();
+  }
+
+  Future<bool> buildRoute({
+    required List<LatLng> waypoints,
+    MapOptions? options,
+    DrivingProfile profile = DrivingProfile.drivingTraffic,
+  }) async {
+    return await _vietmapAutomotiveFlutterPlatform.buildRoute(
+      waypoints: waypoints,
+      options: options,
+      profile: profile,
+    );
   }
 
   void _initPlatformInterface() {

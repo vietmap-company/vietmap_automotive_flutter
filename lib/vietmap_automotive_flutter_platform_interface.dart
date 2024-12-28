@@ -1,7 +1,10 @@
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'package:vietmap_automotive_flutter/models/polyline.dart';
 
+import 'models/latlng.dart';
 import 'models/marker.dart';
+import 'models/navmode.dart';
+import 'models/options.dart';
 import 'models/polygon.dart';
 import 'vietmap_automotive_flutter_method_channel.dart';
 
@@ -147,5 +150,14 @@ abstract class VietmapAutomotiveFlutterPlatform extends PlatformInterface {
   /// Returns a boolean value indicating whether the polygons have been removed successfully.
   Future<bool?> removeAllPolygons() {
     throw UnimplementedError('removeAllPolygons() has not been implemented.');
+  }
+
+  /// Builds a route with the given waypoints and options.
+  /// Returns a boolean value indicating whether the route has been built successfully.
+  Future<bool> buildRoute(
+      {required List<LatLng> waypoints,
+      MapOptions? options,
+      DrivingProfile profile = DrivingProfile.drivingTraffic}) {
+    throw UnimplementedError('buildRoute() has not been implemented.');
   }
 }

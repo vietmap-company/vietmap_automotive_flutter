@@ -132,6 +132,11 @@ class VietmapAutomotiveFlutterPlugin: FlutterPlugin, MethodCallHandler, Lifecycl
                 val isRemoved = vietmapCarApp?.removePolygon(data) ?: false
                 result.success(isRemoved)
             }
+            VietmapAutomotiveEvent.BUILD_ROUTE.nameValue -> {
+                val data = call.arguments as Map<*,*>
+                val isRouteBuilt = vietmapCarApp?.buildRoute(data)
+                result.success(isRouteBuilt)
+            }
             else -> {
               result.notImplemented()
             }

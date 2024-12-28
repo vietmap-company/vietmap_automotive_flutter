@@ -16,4 +16,5 @@ enum class VietmapAutomotiveEvent(val nameValue: String) {
     ON_MAP_STYLE_LOADED("onStyleLoaded"),
     ON_MAP_RENDERED("onMapRendered"),
     ON_MAP_READY("onMapReady"),
+    BUILD_ROUTE("buildRoute"),
 }
