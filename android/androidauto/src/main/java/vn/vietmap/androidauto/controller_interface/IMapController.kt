@@ -4,4 +4,5 @@ interface IMapController {
     fun zoomIn()
     fun zoomOut()
     fun recenter()
+    fun overviewRoute()
 }
