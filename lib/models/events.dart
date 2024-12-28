@@ -17,4 +17,5 @@ class Events {
   static const String onStyleLoaded = 'onStyleLoaded';
   static const String onMapRendered = 'onMapRendered';
   static const String onMapReady = 'onMapReady';
+  static const String buildRoute = 'buildRoute';
 }
