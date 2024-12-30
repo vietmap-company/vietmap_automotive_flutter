@@ -258,7 +258,8 @@ class _MyAppState extends State<MyApp> {
                     await _vietmapAutomotiveFlutterPlugin.buildRoute(
                       waypoints: [
                         const LatLng(lat: 10.762528, lng: 106.653099),
-                        const LatLng(lat: 10.760235003798165, lng: 106.68223947304341),
+                        const LatLng(
+                            lat: 10.760235003798165, lng: 106.68223947304341),
                       ],
                     );
                   },
@@ -267,9 +268,30 @@ class _MyAppState extends State<MyApp> {
                 const SizedBox(height: 10),
                 ElevatedButton(
                   onPressed: () async {
+                    await _vietmapAutomotiveFlutterPlugin.buildRoute(
+                      waypoints: [
+                        const LatLng(lat: 10.762528, lng: 106.653099),
+                        const LatLng(
+                            lat: 10.760235003798165, lng: 106.68223947304341),
+                      ],
+                      startNavigation: true,
+                    );
+                  },
+                  child: const Text('Build Route And Start Navigation'),
+                ),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: () async {
                     await _vietmapAutomotiveFlutterPlugin.overviewRoute();
                   },
                   child: const Text('Overview Route'),
+                ),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: () async {
+                    await _vietmapAutomotiveFlutterPlugin.recenter();
+                  },
+                  child: const Text('Recenter'),
                 ),
                 const SizedBox(height: 10),
                 ElevatedButton(
@@ -284,6 +306,64 @@ class _MyAppState extends State<MyApp> {
                     await _vietmapAutomotiveFlutterPlugin.startNavigation();
                   },
                   child: const Text('Start Navigation'),
+                ),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: () async {
+                    await _vietmapAutomotiveFlutterPlugin.stopNavigation();
+                  },
+                  child: const Text('Stop Navigation'),
+                ),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: () async {
+                    await _vietmapAutomotiveFlutterPlugin.zoomIn();
+                  },
+                  child: const Text('Zoom In'),
+                ),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: () async {
+                    await _vietmapAutomotiveFlutterPlugin.zoomOut();
+                  },
+                  child: const Text('Zoom Out'),
+                ),
+                const SizedBox(height: 10),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            await _vietmapAutomotiveFlutterPlugin.moveCamera(
+                              latLng: const LatLng(
+                                lat: 10.760235003798165,
+                                lng: 106.68223947304341,
+                              ),
+                              zoom: 16,
+                            );
+                          },
+                          child: const Text('Move Camera'),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            await _vietmapAutomotiveFlutterPlugin.animateCamera(
+                              latLng: const LatLng(
+                                lat: 10.760235003798165,
+                                lng: 106.68223947304341,
+                              ),
+                              zoom: 16,
+                            );
+                          },
+                          child: const Text('Animate Camera'),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 10),
               ],

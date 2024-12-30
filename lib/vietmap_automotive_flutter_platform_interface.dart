@@ -154,10 +154,12 @@ abstract class VietmapAutomotiveFlutterPlatform extends PlatformInterface {
 
   /// Builds a route with the given waypoints and options.
   /// Returns a boolean value indicating whether the route has been built successfully.
-  Future<bool?> buildRoute(
-      {required List<LatLng> waypoints,
-      MapOptions? options,
-      DrivingProfile profile = DrivingProfile.drivingTraffic}) {
+  Future<bool?> buildRoute({
+    required List<LatLng> waypoints,
+    MapOptions? options,
+    DrivingProfile profile = DrivingProfile.drivingTraffic,
+    bool startNavigation = false,
+  }) {
     throw UnimplementedError('buildRoute() has not been implemented.');
   }
 
@@ -179,5 +181,44 @@ abstract class VietmapAutomotiveFlutterPlatform extends PlatformInterface {
   /// or null if the navigation is not started successfully.
   Future<bool?> startNavigation({MapOptions? options}) {
     throw UnimplementedError('startNavigation() has not been implemented.');
+  }
+
+  /// Re-center the map view to the current location.
+  Future<void> recenter({MapOptions? options}) {
+    throw UnimplementedError('recenter() has not been implemented.');
+  }
+
+  /// Stops the current navigation process.
+  /// Returns a boolean value indicating whether the navigation has been stopped successfully.
+  /// or null if the navigation is not stopped successfully.
+  Future<bool?> stopNavigation() {
+    throw UnimplementedError('stopNavigation() has not been implemented.');
+  }
+
+  /// Zooms in the map view.
+  Future<void> zoomIn() {
+    throw UnimplementedError('zoomIn() has not been implemented.');
+  }
+
+  /// Zooms out the map view.
+  Future<void> zoomOut() {
+    throw UnimplementedError('zoomOut() has not been implemented.');
+  }
+
+  /// Moves the camera to the given [latLng] with optional [bearing], [zoom], and [tilt].
+  Future<void> moveCamera(
+      {required LatLng latLng, double? bearing, double? zoom, double? tilt}) {
+    throw UnimplementedError('moveCamera() has not been implemented.');
+  }
+
+  /// Animates the camera to the given [latLng] with optional [bearing], [zoom], and [tilt].
+  /// The [duration] parameter specifies the duration of the animation.
+  Future<void> animateCamera(
+      {required LatLng latLng,
+      double? bearing,
+      Duration duration = const Duration(milliseconds: 1000),
+      double? zoom,
+      double? tilt}) {
+    throw UnimplementedError('animateCamera() has not been implemented.');
   }
 }

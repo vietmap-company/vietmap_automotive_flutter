@@ -167,4 +167,69 @@ class VietMapCarSurfaceHelper(
         navigationTemplate.setActionStrip(actionStrip.build())
         navigationTemplate.setMapActionStrip(mapActionStrip.build())
     }
+
+    fun updateOnStartNavigationTemplate(){
+        actionStrip = ActionStrip.Builder()
+        // Set the action strip.
+        actionStrip.addAction(
+            Action.Builder()
+                .setTitle("Kết thúc")
+                .setOnClickListener {
+                    mapController.stopNavigation()
+                }
+                .build()
+        ).addAction(
+            Action.Builder()
+                .setIcon(
+                    CarIcon.Builder(
+                        IconCompat.createWithResource(
+                            carContext,
+                            R.drawable.recenter
+                        )
+                    ).build()
+                )
+                .setOnClickListener {
+                    mapController.recenter()
+                }
+                .build()
+        )
+
+        mapActionStrip = ActionStrip.Builder()
+        mapActionStrip.addAction(
+            Action.Builder(Action.PAN).build()
+        ).addAction(
+            Action.Builder()
+                .setIcon(
+                    CarIcon.Builder(
+                        IconCompat.createWithResource(
+                            carContext,
+                            R.drawable.add
+                        )
+                    ).build()
+                )
+                .setOnClickListener {
+                    mapController.zoomIn()
+                }
+                .build()
+        ).addAction(
+            Action.Builder()
+                .setIcon(
+                    CarIcon.Builder(
+                        IconCompat.createWithResource(
+                            carContext,
+                            R.drawable.minus
+                        )
+                    ).build()
+                )
+                .setOnClickListener {
+                    mapController.zoomOut()
+                }
+                .build()
+        )
+
+        navigationTemplate = NavigationTemplate.Builder()
+        navigationTemplate.setBackgroundColor(CarColor.SECONDARY)
+        navigationTemplate.setActionStrip(actionStrip.build())
+        navigationTemplate.setMapActionStrip(mapActionStrip.build())
+    }
 }

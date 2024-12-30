@@ -12,7 +12,6 @@ import 'package:vietmap_automotive_flutter/models/on_click_events.dart';
 import 'package:vietmap_automotive_flutter/models/options.dart';
 import 'package:vietmap_automotive_flutter/models/polygon.dart';
 import 'package:vietmap_automotive_flutter/models/polyline.dart';
-import 'package:vietmap_automotive_flutter/utils/extensions.dart';
 
 import 'models/events.dart';
 import 'models/map_template.dart';
@@ -331,6 +330,7 @@ class MethodChannelVietmapAutomotiveFlutter
     required List<LatLng> waypoints,
     MapOptions? options,
     DrivingProfile profile = DrivingProfile.drivingTraffic,
+    bool startNavigation = false,
   }) async {
     assert(waypoints.length > 1);
     if (Platform.isIOS && waypoints.length > 3 && options?.mode != null) {
@@ -343,10 +343,10 @@ class MethodChannelVietmapAutomotiveFlutter
       var latLng = waypoints[i];
 
       final pointMap = <String, dynamic>{
-        "Order": i,
-        "Name": i.toString(),
-        "Latitude": latLng.lat,
-        "Longitude": latLng.lng,
+        "order": i,
+        "name": i.toString(),
+        "latitude": latLng.lat,
+        "longitude": latLng.lng,
       };
       pointList.add(pointMap);
     }
@@ -357,7 +357,8 @@ class MethodChannelVietmapAutomotiveFlutter
     if (options != null) args = options.toMap();
     args["wayPoints"] = wayPointMap;
 
-    args['profile'] = profile.getValue();
+    args['profile'] = profile.stringValue;
+    args['startNavigation'] = startNavigation;
     return await methodChannel.invokeMethod(Events.buildRoute, args);
   }
 
@@ -388,5 +389,69 @@ class MethodChannelVietmapAutomotiveFlutter
     if (options != null) args = options.toMap();
 
     return await methodChannel.invokeMethod(Events.startNavigation, args);
+  }
+
+  /// Recenter the map with the given options.
+  @override
+  Future<void> recenter({MapOptions? options}) async {
+    Map<String, dynamic>? args;
+    if (options != null) args = options.toMap();
+
+    return methodChannel.invokeMethod(Events.recenter, args);
+  }
+
+  /// Stop the current navigation on Android Auto and Apple CarPlay.
+  /// Returns a [bool] containing the result of the navigation stopping.
+  /// or null if the navigation is not stopped successfully.
+  @override
+  Future<bool?> stopNavigation() async {
+    return await methodChannel.invokeMethod(Events.stopNavigation);
+  }
+
+  /// Zoom in the map view.
+  @override
+  Future<void> zoomIn() async {
+    return await methodChannel.invokeMethod(Events.zoomIn);
+  }
+
+  /// Zoom out the map view.
+  @override
+  Future<void> zoomOut() async {
+    return await methodChannel.invokeMethod(Events.zoomOut);
+  }
+
+  /// Move the camera to the given [LatLng] with optional bearing, zoom, and tilt.
+  @override
+  Future<void> moveCamera(
+      {required LatLng latLng,
+      double? bearing,
+      double? zoom,
+      double? tilt}) async {
+    await methodChannel.invokeMethod(Events.moveCamera, {
+      'latitude': latLng.lat,
+      'longitude': latLng.lng,
+      'bearing': bearing,
+      'zoom': zoom,
+      'tilt': tilt
+    });
+  }
+
+  /// Animate the camera to the given [LatLng] with optional bearing, zoom, tilt, and duration.
+  /// The default duration is 1000 milliseconds.
+  @override
+  Future<void> animateCamera(
+      {required LatLng latLng,
+      double? bearing,
+      Duration duration = const Duration(milliseconds: 1000),
+      double? zoom,
+      double? tilt}) async {
+    await methodChannel.invokeMethod(Events.animateCamera, {
+      'latitude': latLng.lat,
+      'longitude': latLng.lng,
+      'bearing': bearing,
+      'zoom': zoom,
+      'tilt': tilt,
+      'duration': duration.inMilliseconds
+    });
   }
 }

@@ -17,6 +17,7 @@ import vn.vietmap.androidauto.VietMapCarAppScreen
 import vn.vietmap.androidauto.VietMapCarAppSession
 import vn.vietmap.androidauto.communicate_interface.IAutomotiveCommunicator
 import vn.vietmap.androidauto.events.VietmapAutomotiveEvent
+import vn.vietmap.vietmapsdk.geometry.LatLng
 
 class VietmapAutomotiveFlutterPlugin: FlutterPlugin, MethodCallHandler, LifecycleObserver, LifecycleOwner {
     private lateinit var channel : MethodChannel
@@ -149,6 +150,29 @@ class VietmapAutomotiveFlutterPlugin: FlutterPlugin, MethodCallHandler, Lifecycl
                 val data = call.arguments as? Map<*, *>
                 val startNavigationSuccessfully = vietmapCarApp?.startNavigation(data)
                 result.success(startNavigationSuccessfully)
+            }
+            VietmapAutomotiveEvent.STOP_NAVIGATION.nameValue -> {
+                val stopNavigationSuccessfully = vietmapCarApp?.stopNavigation()
+                result.success(stopNavigationSuccessfully)
+            }
+            VietmapAutomotiveEvent.ZOOM_IN.nameValue -> {
+                vietmapCarApp?.zoomIn()
+            }
+            VietmapAutomotiveEvent.ZOOM_OUT.nameValue -> {
+                vietmapCarApp?.zoomOut()
+            }
+            VietmapAutomotiveEvent.RECENTER.nameValue -> {
+                val args = call.arguments as? Map<*, *>
+                val recenterSuccessfully = vietmapCarApp?.recenter(args)
+                result.success(recenterSuccessfully)
+            }
+            VietmapAutomotiveEvent.ANIMATE_CAMERA.nameValue -> {
+                val args = call.arguments as? Map<*, *>
+                vietmapCarApp?.animateCamera(args)
+            }
+            VietmapAutomotiveEvent.MOVE_CAMERA.nameValue -> {
+                val args = call.arguments as? Map<*, *>
+                vietmapCarApp?.moveCamera(args)
             }
             else -> {
               result.notImplemented()
