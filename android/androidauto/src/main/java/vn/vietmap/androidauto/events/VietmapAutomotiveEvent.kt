@@ -20,4 +20,10 @@ enum class VietmapAutomotiveEvent(val nameValue: String) {
     OVERVIEW_ROUTE("overviewRoute"),
     CLEAR_ROUTE("clearRoute"),
     START_NAVIGATION("startNavigation"),
+    RECENTER("recenter"),
+    ZOOM_IN("zoomIn"),
+    ZOOM_OUT("zoomOut"),
+    STOP_NAVIGATION("stopNavigation"),
+    ANIMATE_CAMERA("animateCamera"),
+    MOVE_CAMERA("moveCamera"),
 }

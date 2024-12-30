@@ -172,11 +172,13 @@ class VietmapAutomotiveFlutter {
     required List<LatLng> waypoints,
     MapOptions? options,
     DrivingProfile profile = DrivingProfile.drivingTraffic,
+    bool startNavigation = false,
   }) async {
     return await _vietmapAutomotiveFlutterPlatform.buildRoute(
       waypoints: waypoints,
       options: options,
       profile: profile,
+      startNavigation: startNavigation,
     );
   }
 
@@ -205,6 +207,61 @@ class VietmapAutomotiveFlutter {
   }) async {
     return await _vietmapAutomotiveFlutterPlatform.startNavigation(
       options: options,
+    );
+  }
+
+  /// Re-centers the map view to the current location.
+  Future<void> recenter({MapOptions? options}) async {
+    return await _vietmapAutomotiveFlutterPlatform.recenter(
+      options: options,
+    );
+  }
+
+  /// Stops the navigation on Android Auto and Apple CarPlay.
+  /// Returns a [bool] containing the result of the navigation stopping.
+  /// or null if the navigation is not stopped successfully.
+  Future<bool?> stopNavigation() async {
+    return await _vietmapAutomotiveFlutterPlatform.stopNavigation();
+  }
+
+  /// Zooms in the map view on Android Auto and Apple CarPlay.
+  Future<void> zoomIn() async {
+    return await _vietmapAutomotiveFlutterPlatform.zoomIn();
+  }
+
+  /// Zooms out the map view on Android Auto and Apple CarPlay.
+  Future<void> zoomOut() async {
+    return await _vietmapAutomotiveFlutterPlatform.zoomOut();
+  }
+
+  /// Moves the camera to the given [latLng] with optional [bearing], [zoom], and [tilt] on Android Auto and Apple CarPlay.
+  Future<void> moveCamera(
+      {required LatLng latLng,
+      double? bearing,
+      double? zoom,
+      double? tilt}) async {
+    return _vietmapAutomotiveFlutterPlatform.moveCamera(
+      latLng: latLng,
+      bearing: bearing,
+      zoom: zoom,
+      tilt: tilt,
+    );
+  }
+
+  /// Animate the camera to the given [LatLng] with optional bearing, zoom, tilt, and duration.
+  /// The default duration is 1000 milliseconds.
+  Future<void> animateCamera(
+      {required LatLng latLng,
+      double? bearing,
+      Duration duration = const Duration(milliseconds: 1000),
+      double? zoom,
+      double? tilt}) async {
+    return _vietmapAutomotiveFlutterPlatform.animateCamera(
+      latLng: latLng,
+      bearing: bearing,
+      duration: duration,
+      zoom: zoom,
+      tilt: tilt,
     );
   }
 

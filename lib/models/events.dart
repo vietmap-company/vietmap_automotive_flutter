@@ -21,4 +21,10 @@ class Events {
   static const String overviewRoute = 'overviewRoute';
   static const String clearRoute = 'clearRoute';
   static const String startNavigation = 'startNavigation';
+  static const String recenter = 'recenter';
+  static const String stopNavigation = 'stopNavigation';
+  static const String zoomIn = 'zoomIn';
+  static const String zoomOut = 'zoomOut';
+  static const String moveCamera = 'moveCamera';
+  static const String animateCamera = 'animateCamera';
 }

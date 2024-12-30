@@ -25,7 +25,6 @@ import okhttp3.internal.toHexString
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import timber.log.Timber
 import vn.vietmap.androidauto.communicate_interface.IAutomotiveCommunicator
 import vn.vietmap.androidauto.controller_interface.IMapController
 import vn.vietmap.androidauto.helper.VietMapCarSurfaceHelper
@@ -48,7 +47,6 @@ import vn.vietmap.services.android.navigation.v5.navigation.NavigationRoute
 import vn.vietmap.services.android.navigation.v5.navigation.NavigationTimeFormat
 import vn.vietmap.services.android.navigation.v5.navigation.VietmapNavigation
 import vn.vietmap.services.android.navigation.v5.navigation.VietmapNavigationOptions
-import vn.vietmap.services.android.navigation.v5.offroute.OffRoute
 import vn.vietmap.services.android.navigation.v5.offroute.OffRouteListener
 import vn.vietmap.services.android.navigation.v5.route.FasterRouteListener
 import vn.vietmap.services.android.navigation.v5.routeprogress.ProgressChangeListener
@@ -510,8 +508,8 @@ class VietMapCarAppScreen(
             val wayPointsList = arguments["wayPoints"] as HashMap<*, *>
             for (item in wayPointsList) {
                 val point = item.value as HashMap<*, *>
-                val latitude = point["Latitude"] as Double
-                val longitude = point["Longitude"] as Double
+                val latitude = point["latitude"] as Double
+                val longitude = point["longitude"] as Double
                 wayPoints.add(Point.fromLngLat(longitude, latitude))
             }
             val profile = arguments["profile"] as? String ?: "driving-traffic"
@@ -520,7 +518,8 @@ class VietMapCarAppScreen(
             val destinationWayPoint = wayPoints[1]
             destinationPoint =
                 Point.fromLngLat(destinationWayPoint.longitude(), destinationWayPoint.latitude())
-            fetchRouteWithBearing(false, profile)
+            val startNavigation = arguments["startNavigation"] as? Boolean ?: false
+            fetchRouteWithBearing(startNavigation, profile)
 
             return true
         } else {
@@ -641,6 +640,13 @@ class VietMapCarAppScreen(
         }
     }
 
+    fun recenter(args: Map<*, *>?) {
+        if (args != null) {
+            setOptions(args)
+        }
+        recenter()
+    }
+
     override fun overviewRoute() {
         isOverviewing = true
         if (currentRoute != null) {
@@ -696,11 +702,18 @@ class VietMapCarAppScreen(
             vietmapNavigation?.snapEngine = snapEngine
             navigationMapRoute!!.showAlternativeRoutes(true)
             currentRoute?.let {
+                vietmapNavigationSurfaceHelper.updateOnStartNavigationTemplate()
+                invalidate()
                 isNavigationInProgress = true
                 vietmapNavigation?.startNavigation(currentRoute!!)
                 recenter()
             }
         }
+    }
+
+    override fun stopNavigation() : Boolean {
+        finishNavigation()
+        return currentRoute != null
     }
 
     fun overviewRoute(arguments: Map<*, *>?) {
@@ -1096,4 +1109,56 @@ class VietMapCarAppScreen(
         }
     }
 
+    fun animateCamera(args: Map<*, *>?) {
+        val location = LatLng(
+            args?.get("latitude") as Double,
+            args["longitude"] as Double
+        )
+        val zoom = args["zoom"] as Double?
+        val bearing = args["bearing"] as Double?
+        val tilt = args["tilt"] as Double?
+        val duration = args["duration"] as Int
+
+        isOverviewing = true
+        val cameraPosition = CameraPosition.Builder().target(location)
+        zoom?.let {
+            cameraPosition.zoom(it)
+        }
+        tilt?.let {
+            cameraPosition.tilt(it)
+        }
+
+        if (bearing != null) {
+            cameraPosition.bearing(bearing.toDouble())
+        }
+        vietmapGL?.animateCamera(
+            CameraUpdateFactory.newCameraPosition(cameraPosition.build()), duration
+        )
+    }
+
+    fun moveCamera(args: Map<*, *>?) {
+        val location = LatLng(
+            args?.get("latitude") as Double,
+            args["longitude"] as Double
+        )
+        val zoom = args["zoom"] as Double?
+        val bearing = args["bearing"] as Double?
+        val tilt = args["tilt"] as Double?
+
+        isOverviewing = true
+        val cameraPosition = CameraPosition.Builder().target(location)
+        zoom?.let {
+            cameraPosition.zoom(it)
+        }
+        tilt?.let {
+            cameraPosition.tilt(it)
+        }
+
+        if (bearing != null) {
+            cameraPosition.bearing(bearing.toDouble())
+        }
+        vietmapGL?.moveCamera(
+            CameraUpdateFactory.newCameraPosition(cameraPosition.build())
+        )
+    }
 }

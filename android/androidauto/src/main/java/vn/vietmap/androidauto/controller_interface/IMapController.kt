@@ -7,4 +7,5 @@ interface IMapController {
     fun overviewRoute()
     fun clearRoute() : Boolean
     fun startNavigation()
+    fun stopNavigation(): Boolean
 }
