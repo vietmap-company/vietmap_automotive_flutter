@@ -8,4 +8,13 @@ enum NavigationMode { walking, cycling, driving, drivingWithTraffic }
 enum MapNavigationMode { walking, cycling, driving, drivingWithTraffic }
 
 ///Option to specify the mode of transportation.
-enum DrivingProfile { drivingTraffic, cycling, walking, motorcycle }
+enum DrivingProfile {
+  drivingTraffic("driving-traffic"),
+  cycling("cycling"),
+  walking("walking"),
+  motorcycle("motorcycle");
+
+  final String stringValue;
+
+  const DrivingProfile(this.stringValue);
+}

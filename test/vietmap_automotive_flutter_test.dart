@@ -99,10 +99,12 @@ class MockVietmapAutomotiveFlutterPlatform
   void removeOnStyleLoadedListener(Function() listener) {}
 
   @override
-  Future<bool> buildRoute(
-      {required List<LatLng> waypoints,
-      MapOptions? options,
-      profile = DrivingProfile.drivingTraffic}) {
+  Future<bool> buildRoute({
+    required List<LatLng> waypoints,
+    MapOptions? options,
+    profile = DrivingProfile.drivingTraffic,
+    bool startNavigation = false,
+  }) {
     throw UnimplementedError();
   }
 
@@ -116,6 +118,42 @@ class MockVietmapAutomotiveFlutterPlatform
 
   @override
   Future<bool?> startNavigation({MapOptions? options}) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> recenter({MapOptions? options}) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<bool?> stopNavigation() {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> zoomIn() {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> zoomOut() {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> moveCamera(
+      {required LatLng latLng, double? bearing, double? zoom, double? tilt}) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> animateCamera(
+      {required LatLng latLng,
+      double? bearing,
+      Duration duration = const Duration(milliseconds: 1000),
+      double? zoom,
+      double? tilt}) {
     throw UnimplementedError();
   }
 }
