@@ -454,4 +454,26 @@ class MethodChannelVietmapAutomotiveFlutter
       'duration': duration.inMilliseconds
     });
   }
+
+  /// Gets the distance remaining to the destination on the current route.
+  /// Returns the distance remaining to the destination in selected unit.
+  @override
+  Future<double?> getDistanceRemaining() async {
+    return await methodChannel.invokeMethod<double>(Events.distanceRemaining);
+  }
+
+  /// Gets the duration remaining to the destination on the current route.
+  @override
+  Future<double?> getDurationRemaining() async {
+    return await methodChannel.invokeMethod<double>(Events.durationRemaining);
+  }
+
+  /// Toggle the mute state of the navigation instructions.
+  /// Returns a [bool] containing the result of the mute toggling.
+  /// The boolean value is true if the mute is enabled, false otherwise.
+  @override
+  Future<bool?> toggleMute(bool isMute) {
+    return methodChannel
+        .invokeMethod<bool>(Events.toggleMute, {'isMute': isMute});
+  }
 }

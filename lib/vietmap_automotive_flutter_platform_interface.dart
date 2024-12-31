@@ -221,4 +221,23 @@ abstract class VietmapAutomotiveFlutterPlatform extends PlatformInterface {
       double? tilt}) {
     throw UnimplementedError('animateCamera() has not been implemented.');
   }
+
+  /// Get distance remaining to the destination on the current route.
+  /// Returns the distance remaining to the destination in selected unit.
+  Future<double?> getDistanceRemaining() {
+    throw UnimplementedError(
+        'getDistanceRemaining() has not been implemented.');
+  }
+
+  /// Get duration remaining to the destination on the current route.
+  Future<double?> getDurationRemaining() {
+    throw UnimplementedError(
+        'getDurationRemaining() has not been implemented.');
+  }
+
+  /// Toggle mute/unmute the voice guidance.
+  /// Returns a boolean value indicating whether the voice guidance has been toggled successfully.
+  Future<bool?> toggleMute(bool isMute) {
+    throw UnimplementedError('toggleMute() has not been implemented.');
+  }
 }

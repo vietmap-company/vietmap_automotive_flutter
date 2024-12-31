@@ -265,6 +265,26 @@ class VietmapAutomotiveFlutter {
     );
   }
 
+  /// Get the distance remaining to the destination on the current route.
+  /// Returns the distance remaining to the destination in selected unit.
+  Future<double?> getDistanceRemaining() async {
+    return await _vietmapAutomotiveFlutterPlatform.getDistanceRemaining();
+  }
+
+  /// Get the duration remaining to the destination on the current route.
+  Future<double?> getDurationRemaining() async {
+    return await _vietmapAutomotiveFlutterPlatform.getDurationRemaining();
+  }
+
+  /// Toggle mute on Android Auto and Apple CarPlay during navigation.
+  /// Returns a [bool] containing the result of the mute toggling.
+  /// The boolean value is true if the mute is enabled, false otherwise.
+  Future<bool?> toggleMute({
+    required bool isMuted,
+  }) async {
+    return await _vietmapAutomotiveFlutterPlatform.toggleMute(isMuted);
+  }
+
   void _initPlatformInterface() {
     _vietmapAutomotiveFlutterPlatform.init(
       onMapReady: onMapReady,

@@ -156,6 +156,21 @@ class MockVietmapAutomotiveFlutterPlatform
       double? tilt}) {
     throw UnimplementedError();
   }
+
+  @override
+  Future<double?> getDistanceRemaining() {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<double?> getDurationRemaining() {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<bool?> toggleMute(bool isMute) {
+    throw UnimplementedError();
+  }
 }
 
 void main() {

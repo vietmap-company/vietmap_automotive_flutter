@@ -37,6 +37,9 @@ class _MyAppState extends State<MyApp> {
   bool _isMapReady = false;
   bool _isMapRendered = false;
   bool _isStyleLoaded = false;
+  bool _isVoiceInstructionEnabled = true;
+  double? _distanceRemaining;
+  double? _durationRemaining;
   late final VietmapAutomotiveFlutter _vietmapAutomotiveFlutterPlugin;
   final _markers = <Marker>[];
   final _polylines = <Polyline>[];
@@ -364,6 +367,69 @@ class _MyAppState extends State<MyApp> {
                       ),
                     ],
                   ),
+                ),
+                const SizedBox(height: 10),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            final resp = await _vietmapAutomotiveFlutterPlugin
+                                .getDistanceRemaining();
+                            setState(() {
+                              _distanceRemaining = resp;
+                            });
+                          },
+                          child: const Text(
+                            'Get Distance Remaining',
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            final resp = await _vietmapAutomotiveFlutterPlugin
+                                .getDurationRemaining();
+                            setState(() {
+                              _durationRemaining = resp;
+                            });
+                          },
+                          child: const Text(
+                            'Get Duration Remaining',
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  'Distance Remaining: $_distanceRemaining',
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  'Duration Remaining: $_durationRemaining',
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: () async {
+                    final resp =
+                        await _vietmapAutomotiveFlutterPlugin.toggleMute(
+                      isMuted: _isVoiceInstructionEnabled,
+                    );
+                    if (resp == null) return;
+                    setState(() {
+                      _isVoiceInstructionEnabled = !resp;
+                    });
+                  },
+                  child: const Text('Mute/Unmute Voice Instruction'),
                 ),
                 const SizedBox(height: 10),
               ],

@@ -26,4 +26,7 @@ enum class VietmapAutomotiveEvent(val nameValue: String) {
     STOP_NAVIGATION("stopNavigation"),
     ANIMATE_CAMERA("animateCamera"),
     MOVE_CAMERA("moveCamera"),
+    DISTANCE_REMAINING("distanceRemaining"),
+    DURATION_REMAINING("durationRemaining"),
+    TOGGLE_MUTE("toggleMute")
 }

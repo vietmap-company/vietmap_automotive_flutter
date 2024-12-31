@@ -21,7 +21,7 @@ import vn.vietmap.vietmapsdk.geometry.LatLng
 
 class VietmapAutomotiveFlutterPlugin: FlutterPlugin, MethodCallHandler, LifecycleObserver, LifecycleOwner {
     private lateinit var channel : MethodChannel
-    var vietmapCarApp : VietMapCarAppScreen? = null
+    private var vietmapCarApp : VietMapCarAppScreen? = null
     private val styleUrl: MutableLiveData<String> = MutableLiveData("")
     private val apiKey: MutableLiveData<String> = MutableLiveData("")
     private val resourcesLiveData: MediatorLiveData<Pair<String, String>> = MediatorLiveData()
@@ -173,6 +173,18 @@ class VietmapAutomotiveFlutterPlugin: FlutterPlugin, MethodCallHandler, Lifecycl
             VietmapAutomotiveEvent.MOVE_CAMERA.nameValue -> {
                 val args = call.arguments as? Map<*, *>
                 vietmapCarApp?.moveCamera(args)
+            }
+            VietmapAutomotiveEvent.DISTANCE_REMAINING.nameValue -> {
+                result.success(vietmapCarApp?.getDistanceRemaining())
+            }
+            VietmapAutomotiveEvent.DURATION_REMAINING.nameValue -> {
+                result.success(vietmapCarApp?.getDurationRemaining())
+            }
+            VietmapAutomotiveEvent.TOGGLE_MUTE.nameValue -> {
+                val args = call.arguments as? Map<*,*>
+                val isMutedArgs : Boolean = (args?.get("isMuted") as? Boolean) ?: false
+                val isMuted = vietmapCarApp?.muteVoiceInstructions(isMutedArgs)
+                result.success(isMuted)
             }
             else -> {
               result.notImplemented()
