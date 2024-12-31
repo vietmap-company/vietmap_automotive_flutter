@@ -169,6 +169,23 @@ class VietMapCarAppScreen(
         var padding: IntArray = intArrayOf(300, 200, 30, 30)
     }
 
+    fun muteVoiceInstructions(isMute: Boolean) : Boolean {
+        voiceInstructionsEnabled = !isMute
+        speechPlayer?.let {
+            speechPlayer!!.isMuted = isMute
+            return speechPlayer!!.isMuted
+        }
+        return false
+    }
+
+    fun getDistanceRemaining(): Double? {
+        return distanceRemaining
+    }
+
+    fun getDurationRemaining(): Double? {
+        return durationRemaining
+    }
+
     private val mSurfaceCallback: SurfaceCallback = object : SurfaceCallback {
         // Handle surface callback event here
         override fun onClick(x: Float, y: Float) {

@@ -27,4 +27,7 @@ class Events {
   static const String zoomOut = 'zoomOut';
   static const String moveCamera = 'moveCamera';
   static const String animateCamera = 'animateCamera';
+  static const String distanceRemaining = 'distanceRemaining';
+  static const String durationRemaining = 'durationRemaining';
+  static const String toggleMute = 'toggleMute';
 }
