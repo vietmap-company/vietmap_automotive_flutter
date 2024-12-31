@@ -4,6 +4,11 @@ import 'dart:ui';
 extension ColorExt on Color {
   /// Converts the color to a hexadecimal string.
   String toHex() {
-    return '#${value.toRadixString(16).padLeft(6, '0')}';
+    final red = (r * 255).toInt().toRadixString(16).padLeft(2, '0');
+    final green = (g * 255).toInt().toRadixString(16).padLeft(2, '0');
+    final blue = (b * 255).toInt().toRadixString(16).padLeft(2, '0');
+    final alpha = (a * 255).toInt().toRadixString(16).padLeft(2, '0');
+
+    return '$alpha$red$green$blue';
   }
 }
