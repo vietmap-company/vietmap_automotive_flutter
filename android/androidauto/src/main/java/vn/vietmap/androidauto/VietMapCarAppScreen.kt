@@ -11,6 +11,7 @@ import android.graphics.drawable.BitmapDrawable
 import android.location.Location
 import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.car.app.CarContext
 import androidx.car.app.Screen
 import androidx.car.app.SurfaceCallback
@@ -85,6 +86,7 @@ import vn.vietmap.vietmapsdk.style.layers.PropertyFactory.lineColor
 import vn.vietmap.vietmapsdk.style.layers.PropertyFactory.lineJoin
 import vn.vietmap.vietmapsdk.style.layers.PropertyFactory.lineWidth
 import java.util.Locale
+import kotlin.math.round
 
 class VietMapCarAppScreen(
     carContext: CarContext,
@@ -208,6 +210,7 @@ class VietMapCarAppScreen(
             },
             {
                 isMapReady = true
+                isMapViewStarted = true
                 automotiveCommunicator.onMapReady()
                 vietmapGL = it
                 invalidate()
@@ -932,24 +935,9 @@ class VietMapCarAppScreen(
             isBuildingRoute = true
 
             offRoutePoint?.let {
-
                 finishNavigation(isOffRouted = true)
-
                 moveCamera(LatLng(it.latitude(), it.longitude()), null)
-
-//                PluginUtilities.sendEvent(
-//                    VietMapEvents.USER_OFF_ROUTE, VietMapLocation(
-//                        latitude = it.latitude(), longitude = it.longitude()
-//                    ).toString()
-//                )
-
             }
-
-//            PluginUtilities.sendEvent(
-//                VietMapEvents.USER_OFF_ROUTE, VietMapLocation(
-//                    latitude = offRoutePoint?.latitude(), longitude = offRoutePoint?.longitude()
-//                ).toString()
-//            )
 
             originPoint = offRoutePoint
             isNavigationInProgress = true
@@ -1032,6 +1020,7 @@ class VietMapCarAppScreen(
         return snappedLocation
     }
 
+    @RequiresApi(26)
     override fun onProgressChange(location: Location?, routeProgress: RouteProgress?) {
         var currentSpeed = location?.speed
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -1086,15 +1075,41 @@ class VietMapCarAppScreen(
         }
     }
 
+    @RequiresApi(26)
     private fun handleProgressChange(routeProgress: RouteProgress, location: Location) {
         if (location.speed < 1) return
 
         val distanceRemainingToNextTurn =
             routeProgress.currentLegProgress()?.currentStepProgress()?.distanceRemaining()
+        val turnGuideText: String =
+            routeProgress.currentLegProgress()?.currentStep()?.maneuver()?.instruction().toString()
+
+        val distanceToNextTurn =
+            routeProgress.currentLegProgress()?.currentStepProgress()?.distanceRemaining().let {
+                if (it != null) {
+                    round(it)
+                } else {
+                    0.0
+                }
+            }
+        val distanceEstimate = round(routeProgress.distanceRemaining())
+        val durationEstimate = round(routeProgress.durationRemaining())
+        val durationRemaining = round(routeProgress.durationRemaining())
+        updateTravelEstimate(
+            distanceEstimate,
+            durationEstimate.toLong(),
+            "Còn ${VietMapNavigationHelper.getDisplayDuration(durationRemaining / 60)}"
+        )
+        updateManeuver()
+        updateStep(turnGuideText)
+
+        updateRoutingInfo(distanceToNextTurn)
+        invalidate()
+        if (isOverviewing) return
         if (distanceRemainingToNextTurn != null && distanceRemainingToNextTurn < 30) {
             isNextTurnHandling = true
             val resetPosition: CameraPosition =
-                CameraPosition.Builder().tilt(0.0).zoom(17.0).build()
+                CameraPosition.Builder().tilt(tilt).zoom(17.0).bearing(bearing).build()
             val cameraUpdate = CameraUpdateFactory.newCameraPosition(resetPosition)
             vietmapGL?.animateCamera(
                 cameraUpdate, 1000
@@ -1104,10 +1119,35 @@ class VietMapCarAppScreen(
                     .distanceTraveled() > 30 && !isOverviewing
             ) {
                 isNextTurnHandling = false
-                recenter()
             }
         }
     }
+
+    @RequiresApi(26)
+    private fun updateTravelEstimate(
+        distanceEstimate: Double,
+        durationEstimate: Long,
+        descriptionText: String,
+    ) {
+        vietmapNavigationSurfaceHelper.updateTravelEstimate(
+            distanceEstimate,
+            durationEstimate,
+            descriptionText
+        )
+    }
+
+    private fun updateManeuver() {
+        vietmapNavigationSurfaceHelper.updateManeuver(routeProgress)
+    }
+
+    private fun updateRoutingInfo(distanceToNextTurn: Double) {
+        vietmapNavigationSurfaceHelper.updateRoutingInfo(distanceToNextTurn)
+    }
+
+    private fun updateStep(cueGuide: String) {
+        vietmapNavigationSurfaceHelper.updateStep(cueGuide)
+    }
+
 
     fun animateCamera(args: Map<*, *>?) {
         val location = LatLng(
