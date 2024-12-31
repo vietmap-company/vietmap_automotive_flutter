@@ -171,6 +171,15 @@ class MockVietmapAutomotiveFlutterPlatform
   Future<bool?> toggleMute(bool isMute) {
     throw UnimplementedError();
   }
+
+  @override
+  void dispose() {}
+
+  @override
+  void addOnNavigationRunningListener(Function() listener) {}
+
+  @override
+  void removeOnNavigationRunningListener(Function() listener) {}
 }
 
 void main() {

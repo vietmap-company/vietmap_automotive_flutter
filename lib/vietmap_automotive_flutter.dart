@@ -82,6 +82,17 @@ class VietmapAutomotiveFlutter {
     _vietmapAutomotiveFlutterPlatform.removeOnStyleLoadedListener(listener);
   }
 
+  /// Adds a listener to the navigation running event.
+  void addNavigationRunningListener(Function() listener) {
+    _vietmapAutomotiveFlutterPlatform.addOnNavigationRunningListener(listener);
+  }
+
+  /// Removes a listener from the navigation running event.
+  void removeNavigationRunningListener(Function() listener) {
+    _vietmapAutomotiveFlutterPlatform
+        .removeOnNavigationRunningListener(listener);
+  }
+
   Future<String?> getPlatformVersion() {
     return _vietmapAutomotiveFlutterPlatform.getPlatformVersion();
   }
@@ -283,6 +294,11 @@ class VietmapAutomotiveFlutter {
     required bool isMuted,
   }) async {
     return await _vietmapAutomotiveFlutterPlatform.toggleMute(isMuted);
+  }
+
+  /// Disposes the stream controllers and removes the listeners.
+  void dispose() {
+    _vietmapAutomotiveFlutterPlatform.dispose();
   }
 
   void _initPlatformInterface() {

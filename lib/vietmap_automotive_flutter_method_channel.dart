@@ -38,6 +38,7 @@ class MethodChannelVietmapAutomotiveFlutter
   final List<Function(double, double)> _onMapClickListeners = [];
   final List<Function> _onMapRenderedListeners = [];
   final List<Function> _onStyleLoadedListeners = [];
+  final List<Function> _onNavigationRunningListeners = [];
 
   /// Set up the method channel and listen for method calls from the native platform.
   @override
@@ -61,6 +62,7 @@ class MethodChannelVietmapAutomotiveFlutter
       _onStyleLoadedListeners.add(onStyleLoaded);
     }
 
+    /// Set the method call handler to listen for method calls from the native platform.
     _eventSubscription = eventChannel.receiveBroadcastStream().listen(
       (event) {
         final eventData = Map<String, dynamic>.from(event);
@@ -90,8 +92,13 @@ class MethodChannelVietmapAutomotiveFlutter
               listener();
             }
             break;
+          case Events.onNavigationRunning:
+            for (var listener in _onNavigationRunningListeners) {
+              listener();
+            }
+            break;
           default:
-            debugPrint('Method not implemented');
+            debugPrint('Method not implemented $type');
         }
       },
       onError: (error) {
@@ -146,6 +153,18 @@ class MethodChannelVietmapAutomotiveFlutter
   @override
   void removeOnStyleLoadedListener(Function() listener) {
     _onStyleLoadedListeners.remove(listener);
+  }
+
+  /// Method to add a listener for the navigation running event.
+  @override
+  void addOnNavigationRunningListener(Function() listener) {
+    _onNavigationRunningListeners.add(listener);
+  }
+
+  /// Method to remove a listener for the navigation running event.
+  @override
+  void removeOnNavigationRunningListener(Function() listener) {
+    _onNavigationRunningListeners.remove(listener);
   }
 
   @override
@@ -491,5 +510,13 @@ class MethodChannelVietmapAutomotiveFlutter
   Future<bool?> toggleMute(bool isMute) {
     return methodChannel
         .invokeMethod<bool>(Events.toggleMute, {'isMute': isMute});
+  }
+
+  /// Dispose the method channel and cancel the event subscription.
+  @override
+  void dispose() {
+    _eventSubscription?.cancel();
+    _eventSubscription = null;
+    super.dispose();
   }
 }

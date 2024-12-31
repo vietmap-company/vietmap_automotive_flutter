@@ -7,7 +7,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ProcessLifecycleOwner
-import androidx.lifecycle.lifecycleScope
+import com.mapbox.api.directions.v5.models.DirectionsRoute
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.EventChannel.EventSink
@@ -19,9 +19,10 @@ import vn.vietmap.androidauto.VietMapCarAppScreen
 import vn.vietmap.androidauto.VietMapCarAppSession
 import vn.vietmap.androidauto.communicate_interface.IAutomotiveCommunicator
 import vn.vietmap.androidauto.events.VietmapAutomotiveEvent
-import vn.vietmap.vietmapsdk.geometry.LatLng
+import vn.vietmap.androidauto.models.VietMapRouteProgressEvent
 
 class VietmapAutomotiveFlutterPlugin: FlutterPlugin, MethodCallHandler, LifecycleObserver, LifecycleOwner {
+    private var eventSink: EventChannel.EventSink? = null
     private lateinit var channel : MethodChannel
     private var eventSink: EventSink? = null
     var vietmapCarApp : VietMapCarAppScreen? = null
@@ -48,6 +49,70 @@ class VietmapAutomotiveFlutterPlugin: FlutterPlugin, MethodCallHandler, Lifecycl
         override fun onMapClick(lat: Double, lng: Double) {
             sendEvent(VietmapAutomotiveEvent.ON_MAP_CLICK.nameValue, mapOf("lat" to lat, "lng" to lng))
         }
+
+        override fun onNavigationRunning() {
+            sendEvent(VietmapAutomotiveEvent.ON_NAVIGATION_RUNNING.nameValue, mapOf())
+        }
+
+        override fun onMapMove() {
+            sendEvent(VietmapAutomotiveEvent.ON_MAP_MOVE.nameValue, mapOf())
+        }
+
+        override fun onMapMoveEnd() {
+            sendEvent(VietmapAutomotiveEvent.ON_MAP_MOVE_END.nameValue, mapOf())
+        }
+
+        override fun onMarkerClick(markerId: Long) {
+            sendEvent(VietmapAutomotiveEvent.ON_MARKER_CLICK.nameValue, mapOf("markerId" to markerId))
+        }
+
+        override fun onNewRouteSelected(routeData: DirectionsRoute) {
+            sendEvent(VietmapAutomotiveEvent.ON_NEW_ROUTE_SELECTED.nameValue, mapOf("routeData" to routeData.toJson()))
+        }
+
+        override fun onMapLongClick(lat: Double, lng: Double, x: Float, y: Float) {
+            sendEvent(VietmapAutomotiveEvent.ON_MAP_LONG_CLICK.nameValue, mapOf("lat" to lat, "lng" to lng, "x" to x, "y" to y))
+        }
+
+        override fun onRouteBuildFailed(errorMessage: String) {
+            sendEvent(VietmapAutomotiveEvent.ON_ROUTE_BUILD_FAILED.nameValue, mapOf("errorMessage" to errorMessage))
+        }
+
+        override fun onRouteBuilding() {
+            sendEvent(VietmapAutomotiveEvent.ON_ROUTE_BUILDING.nameValue, mapOf())
+        }
+
+        override fun onRouteBuilt(routeData: DirectionsRoute) {
+            sendEvent(VietmapAutomotiveEvent.ON_ROUTE_BUILT.nameValue, mapOf("routeData" to routeData.toJson()))
+        }
+
+        override fun onProgressChange(progressEvent: VietMapRouteProgressEvent) {
+            sendEvent(VietmapAutomotiveEvent.ON_PROGRESS_CHANGE.nameValue, mapOf("progressEvent" to progressEvent.toJson()))
+        }
+
+        override fun onUserOffRoute(lat: Double, lng: Double) {
+            sendEvent(VietmapAutomotiveEvent.ON_USER_OFF_ROUTE.nameValue, mapOf("lat" to lat, "lng" to lng))
+        }
+
+        override fun onArrival() {
+            sendEvent(VietmapAutomotiveEvent.ON_ARRIVAL.nameValue, mapOf())
+        }
+
+        override fun onMilestoneEvent(event: String) {
+            sendEvent(VietmapAutomotiveEvent.ON_MILESTONE_EVENT.nameValue, mapOf("event" to event))
+        }
+
+        override fun onFasterRouteFound(routeData: DirectionsRoute) {
+            sendEvent(VietmapAutomotiveEvent.ON_FASTER_ROUTE_FOUND.nameValue, mapOf("routeData" to routeData.toJson()))
+        }
+    }
+
+    fun sendEvent(type: String, eventData: Map<String, Any>){
+        val data = mutableMapOf<String, Any>()
+        data["type"] = type
+        data["data"] = eventData
+
+        eventSink?.success(data)
     }
 
 
