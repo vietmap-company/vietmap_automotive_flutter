@@ -87,6 +87,18 @@ abstract class VietmapAutomotiveFlutterPlatform extends PlatformInterface {
         'removeStyleLoadedListener() has not been implemented.');
   }
 
+  /// Adds a listener to the navigation running event.
+  void addOnNavigationRunningListener(Function() listener) {
+    throw UnimplementedError(
+        'addOnNavigationRunningListener() has not been implemented.');
+  }
+
+  /// Removes a listener from the navigation running event.
+  void removeOnNavigationRunningListener(Function() listener) {
+    throw UnimplementedError(
+        'removeOnNavigationRunningListener() has not been implemented.');
+  }
+
   Future<String?> getPlatformVersion() {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
@@ -239,5 +251,11 @@ abstract class VietmapAutomotiveFlutterPlatform extends PlatformInterface {
   /// Returns a boolean value indicating whether the voice guidance has been toggled successfully.
   Future<bool?> toggleMute(bool isMute) {
     throw UnimplementedError('toggleMute() has not been implemented.');
+  }
+
+  /// Disposes the stream controllers and removes the listeners.
+  /// This method should be called when the plugin object is no longer needed.
+  void dispose() {
+    throw UnimplementedError('dispose() has not been implemented.');
   }
 }

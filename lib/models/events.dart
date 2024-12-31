@@ -30,4 +30,5 @@ class Events {
   static const String distanceRemaining = 'distanceRemaining';
   static const String durationRemaining = 'durationRemaining';
   static const String toggleMute = 'toggleMute';
+  static const String onNavigationRunning = 'onNavigationRunning';
 }

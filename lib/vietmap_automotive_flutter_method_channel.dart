@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -24,12 +25,20 @@ class MethodChannelVietmapAutomotiveFlutter
   @visibleForTesting
   final methodChannel = const MethodChannel('vietmap_automotive_flutter');
 
+  /// The event channel used to listen for events from the native platform.
+  @visibleForTesting
+  final eventChannel = const EventChannel('vietmap_automotive_flutter/events');
+
+  /// Stream to listen for events from the native platform.
+  StreamSubscription<dynamic>? _eventSubscription;
+
   MethodChannelVietmapAutomotiveFlutter();
 
   final List<Function> _onMapReadyListeners = [];
   final List<Function(double, double)> _onMapClickListeners = [];
   final List<Function> _onMapRenderedListeners = [];
   final List<Function> _onStyleLoadedListeners = [];
+  final List<Function> _onNavigationRunningListeners = [];
 
   /// Set up the method channel and listen for method calls from the native platform.
   @override
@@ -54,34 +63,48 @@ class MethodChannelVietmapAutomotiveFlutter
     }
 
     /// Set the method call handler to listen for method calls from the native platform.
-    methodChannel.setMethodCallHandler((call) async {
-      switch (call.method) {
-        case Events.onMapClick:
-          final latitude = call.arguments['lat'] as double;
-          final longitude = call.arguments['lng'] as double;
-          for (var listener in _onMapClickListeners) {
-            listener(latitude, longitude);
-          }
-          break;
-        case Events.onMapReady:
-          for (var listener in _onMapReadyListeners) {
-            listener();
-          }
-          break;
-        case Events.onMapRendered:
-          for (var listener in _onMapRenderedListeners) {
-            listener();
-          }
-          break;
-        case Events.onStyleLoaded:
-          for (var listener in _onStyleLoadedListeners) {
-            listener();
-          }
-          break;
-        default:
-          debugPrint('Method not implemented');
-      }
-    });
+    _eventSubscription = eventChannel.receiveBroadcastStream().listen(
+      (event) {
+        final eventData = Map<String, dynamic>.from(event);
+        final type = eventData['type'] as String?;
+        final data = Map<dynamic, dynamic>.from(eventData['data'] as Map);
+
+        switch (type) {
+          case Events.onMapClick:
+            final latitude = data['lat'] as double;
+            final longitude = data['lng'] as double;
+            for (var listener in _onMapClickListeners) {
+              listener(latitude, longitude);
+            }
+            break;
+          case Events.onMapReady:
+            for (var listener in _onMapReadyListeners) {
+              listener();
+            }
+            break;
+          case Events.onMapRendered:
+            for (var listener in _onMapRenderedListeners) {
+              listener();
+            }
+            break;
+          case Events.onStyleLoaded:
+            for (var listener in _onStyleLoadedListeners) {
+              listener();
+            }
+            break;
+          case Events.onNavigationRunning:
+            for (var listener in _onNavigationRunningListeners) {
+              listener();
+            }
+            break;
+          default:
+            debugPrint('Method not implemented $type');
+        }
+      },
+      onError: (error) {
+        debugPrint('Error in event stream: $error');
+      },
+    );
   }
 
   /// Method to add a listener for the map click event.
@@ -130,6 +153,18 @@ class MethodChannelVietmapAutomotiveFlutter
   @override
   void removeOnStyleLoadedListener(Function() listener) {
     _onStyleLoadedListeners.remove(listener);
+  }
+
+  /// Method to add a listener for the navigation running event.
+  @override
+  void addOnNavigationRunningListener(Function() listener) {
+    _onNavigationRunningListeners.add(listener);
+  }
+
+  /// Method to remove a listener for the navigation running event.
+  @override
+  void removeOnNavigationRunningListener(Function() listener) {
+    _onNavigationRunningListeners.remove(listener);
   }
 
   @override
@@ -475,5 +510,13 @@ class MethodChannelVietmapAutomotiveFlutter
   Future<bool?> toggleMute(bool isMute) {
     return methodChannel
         .invokeMethod<bool>(Events.toggleMute, {'isMute': isMute});
+  }
+
+  /// Dispose the method channel and cancel the event subscription.
+  @override
+  void dispose() {
+    _eventSubscription?.cancel();
+    _eventSubscription = null;
+    super.dispose();
   }
 }

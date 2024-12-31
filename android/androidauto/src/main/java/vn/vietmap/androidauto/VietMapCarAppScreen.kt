@@ -26,12 +26,15 @@ import okhttp3.internal.toHexString
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import vn.vietmap.android.gestures.MoveGestureDetector
 import vn.vietmap.androidauto.communicate_interface.IAutomotiveCommunicator
 import vn.vietmap.androidauto.controller_interface.IMapController
 import vn.vietmap.androidauto.helper.VietMapCarSurfaceHelper
 import vn.vietmap.androidauto.helper.VietMapNavigationHelper
 import vn.vietmap.androidauto.models.CurrentCenterPoint
+import vn.vietmap.androidauto.models.VietMapRouteProgressEvent
 import vn.vietmap.services.android.navigation.ui.v5.camera.CameraOverviewCancelableCallback
+import vn.vietmap.services.android.navigation.ui.v5.listeners.NavigationListener
 import vn.vietmap.services.android.navigation.ui.v5.voice.NavigationSpeechPlayer
 import vn.vietmap.services.android.navigation.ui.v5.voice.SpeechAnnouncement
 import vn.vietmap.services.android.navigation.ui.v5.voice.SpeechPlayer
@@ -78,6 +81,7 @@ import vn.vietmap.vietmapsdk.location.modes.RenderMode
 import vn.vietmap.vietmapsdk.maps.MapView
 import vn.vietmap.vietmapsdk.maps.Style
 import vn.vietmap.vietmapsdk.maps.VietMapGL
+import vn.vietmap.vietmapsdk.maps.VietMapGL.OnMapLongClickListener
 import vn.vietmap.vietmapsdk.style.layers.LineLayer
 import vn.vietmap.vietmapsdk.style.layers.Property.LINE_CAP_ROUND
 import vn.vietmap.vietmapsdk.style.layers.Property.LINE_JOIN_ROUND
@@ -91,8 +95,9 @@ import kotlin.math.round
 class VietMapCarAppScreen(
     carContext: CarContext,
     val mSurfaceRenderer: VietMapAndroidAutoSurface,
-) : Screen(carContext), IMapController, NavigationEventListener, FasterRouteListener, MilestoneEventListener, OffRouteListener, ProgressChangeListener {
+) : Screen(carContext), IMapController, NavigationEventListener, FasterRouteListener, MilestoneEventListener, OffRouteListener, ProgressChangeListener, OnMapLongClickListener {
     private val routeUtils = RouteUtils()
+    private var routeClicked: Boolean = false
     private var vietmapGL: VietMapGL? = null
     private var mapView: MapView? = null
     private var apikey: String? = null
@@ -230,6 +235,22 @@ class VietMapCarAppScreen(
                 isMapViewStarted = true
                 automotiveCommunicator.onMapReady()
                 vietmapGL = it
+                vietmapGL?.addOnMapLongClickListener(this)
+                vietmapGL?.setOnMarkerClickListener { marker ->
+                    automotiveCommunicator.onMarkerClick(marker.id)
+                    true
+                }
+                vietmapGL?.addOnMoveListener(object : VietMapGL.OnMoveListener {
+                    override fun onMoveBegin(moveGestureDetector: MoveGestureDetector) {
+                        isOverviewing = true
+                        automotiveCommunicator.onMapMove()
+                    }
+
+                    override fun onMove(moveGestureDetector: MoveGestureDetector) {}
+                    override fun onMoveEnd(moveGestureDetector: MoveGestureDetector) {
+                        automotiveCommunicator.onMapMoveEnd()
+                    }
+                })
                 invalidate()
             }
         )
@@ -255,6 +276,27 @@ class VietMapCarAppScreen(
                     "vmadmin_province"
                 )
         }
+
+        navigationMapRoute?.setOnRouteSelectionChangeListener {
+            routeClicked = true
+
+            currentRoute = it
+
+            val routePoints: List<Point> =
+                currentRoute?.routeOptions()?.coordinates() as List<Point>
+            animateVietmapGLForRouteOverview(padding, routePoints)
+            primaryRouteIndex = try {
+                it.routeIndex()?.toInt() ?: 0
+            } catch (e: Exception) {
+                0
+            }
+            if (isRunning) {
+                finishNavigation(isOffRouted = true)
+                startNavigation()
+            }
+            automotiveCommunicator.onNewRouteSelected(it)
+        }
+
     }
 
 
@@ -726,6 +768,7 @@ class VietMapCarAppScreen(
                 invalidate()
                 isNavigationInProgress = true
                 vietmapNavigation?.startNavigation(currentRoute!!)
+                automotiveCommunicator.onNavigationRunning()
                 recenter()
             }
         }
@@ -780,6 +823,11 @@ class VietMapCarAppScreen(
     private fun getRoute(
         isStartNavigation: Boolean, bearing: Float?, profile: String,
     ) {
+        if(!VietMapNavigationHelper.isNetworkAvailable(carContext)) {
+            automotiveCommunicator.onRouteBuildFailed("No internet connection")
+            return
+        }
+        automotiveCommunicator.onRouteBuilding()
         val br = bearing ?: 0.0
         val builder = NavigationRoute.builder(carContext)
             .apikey(apikey ?: "")
@@ -795,6 +843,7 @@ class VietMapCarAppScreen(
                 call: Call<DirectionsResponse?>, response: Response<DirectionsResponse?>,
             ) {
                 if (response.body() == null || response.body()!!.routes().size < 1) {
+                    automotiveCommunicator.onRouteBuildFailed("No routes found")
                     return
                 }
                 directionsRoutes = response.body()!!.routes()
@@ -803,6 +852,8 @@ class VietMapCarAppScreen(
                 } else {
                     directionsRoutes!![primaryRouteIndex]
                 }
+
+                automotiveCommunicator.onRouteBuilt(currentRoute!!)
 
                 // Draw the route on the map
                 if (navigationMapRoute != null) {
@@ -841,7 +892,7 @@ class VietMapCarAppScreen(
 
             override fun onFailure(call: Call<DirectionsResponse?>, throwable: Throwable) {
                 isBuildingRoute = false
-
+                automotiveCommunicator.onRouteBuildFailed(throwable.message ?: "No routes found")
             }
         })
     }
@@ -905,12 +956,31 @@ class VietMapCarAppScreen(
     }
 
     override fun onRunning(running: Boolean) {
-        /// On running
+        if(!isNavigationCanceled){
+            automotiveCommunicator.onNavigationRunning()
+        }
     }
 
-    override fun fasterRouteFound(p0: DirectionsRoute?) {
-        /// Faster route found
+    override fun fasterRouteFound(directionsRoute: DirectionsRoute?) {
+        directionsRoute?.let {
+            automotiveCommunicator.onFasterRouteFound(it)
+        }
+
+        refreshNavigation(directionsRoute)
     }
+
+    private fun refreshNavigation(directionsRoute: DirectionsRoute?, shouldCancel: Boolean = true) {
+        directionsRoute?.let {
+
+            if (shouldCancel) {
+
+                currentRoute = directionsRoute
+                finishNavigation()
+                startNavigation()
+            }
+        }
+    }
+
 
     override fun onMilestoneEvent(
         routeProgress: RouteProgress?,
@@ -924,10 +994,11 @@ class VietMapCarAppScreen(
         if (routeUtils.isArrivalEvent(routeProgress, milestone) && isNavigationInProgress) {
             vietmapGL?.locationComponent?.locationEngine = locationEngine
             isPreviewingRoute = false
+            automotiveCommunicator.onArrival()
             finishNavigation()
         }
         if (!isNavigationCanceled) {
-            Log.d("Milestone", "Milestone: $milestone")
+            automotiveCommunicator.onMilestoneEvent(instruction ?: "")
         }
     }
 
@@ -943,6 +1014,7 @@ class VietMapCarAppScreen(
     override fun userOffRoute(location: Location) {
         if (checkIfUserOffRoute(location)) {
             speechPlayer?.onOffRoute()
+            automotiveCommunicator.onUserOffRoute(location.latitude, location.longitude)
             doOnNewRoute(Point.fromLngLat(location.longitude, location.latitude))
         }
     }
@@ -954,7 +1026,10 @@ class VietMapCarAppScreen(
             offRoutePoint?.let {
                 finishNavigation(isOffRouted = true)
                 moveCamera(LatLng(it.latitude(), it.longitude()), null)
+                automotiveCommunicator.onUserOffRoute(it.latitude(), it.longitude())
             }
+
+            automotiveCommunicator.onUserOffRoute(offRoutePoint?.latitude() ?: 0.0, offRoutePoint?.longitude() ?: 0.0)
 
             originPoint = offRoutePoint
             isNavigationInProgress = true
@@ -1010,13 +1085,7 @@ class VietMapCarAppScreen(
                 if (distance < 30) {
                     if (it != currentRoute) {
                         currentRoute = it
-                        currentRoute?.toJson()?.let { it1 ->
-//                            PluginUtilities.sendEvent(
-//                                VietMapEvents.ON_NEW_ROUTE_SELECTED,
-//                                it1
-//                            )
-                            return false
-                        }
+                        automotiveCommunicator.onNewRouteSelected(currentRoute!!)
                     }
 
                 }
@@ -1059,6 +1128,10 @@ class VietMapCarAppScreen(
                     if (!isBuildingRoute) {
                         val snappedLocation: Location =
                             snapEngine.getSnappedLocation(location, routeProgress)
+
+                        val progressEvent =
+                            VietMapRouteProgressEvent(routeProgress, location, snappedLocation)
+                        automotiveCommunicator.onProgressChange(progressEvent)
 
                         currentCenterPoint =
                             CurrentCenterPoint(
@@ -1217,5 +1290,16 @@ class VietMapCarAppScreen(
         vietmapGL?.moveCamera(
             CameraUpdateFactory.newCameraPosition(cameraPosition.build())
         )
+    }
+
+    override fun onMapLongClick(point: LatLng): Boolean {
+        val pointf = vietmapGL!!.projection.toScreenLocation(point)
+        if (wayPoints.size === 2) {
+            wayPoints.clear()
+        }
+
+        automotiveCommunicator.onMapLongClick(point.latitude, point.longitude, pointf.x, pointf.y)
+        return false
+
     }
 }
