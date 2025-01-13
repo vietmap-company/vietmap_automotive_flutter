@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
-  <meta name="description" content="API docs for the init method from the MethodChannelVietmapAutomotiveFlutter class, for the Dart programming language.">
-  <title>init method - MethodChannelVietmapAutomotiveFlutter class - vietmap_automotive_flutter_method_channel library - Dart API</title>
+  <meta name="description" content="API docs for the dispose method from the MethodChannelVietmapAutomotiveFlutter class, for the Dart programming language.">
+  <title>dispose method - MethodChannelVietmapAutomotiveFlutter class - vietmap_automotive_flutter_method_channel library - Dart API</title>
 
 
   
@@ -27,9 +27,9 @@
     <li><a href="../../index.html">vietmap_automotive_flutter</a></li>
     <li><a href="../../vietmap_automotive_flutter_method_channel/">vietmap_automotive_flutter_method_channel.dart</a></li>
     <li><a href="../../vietmap_automotive_flutter_method_channel/MethodChannelVietmapAutomotiveFlutter-class.html">MethodChannelVietmapAutomotiveFlutter</a></li>
-    <li class="self-crumb">init method</li>
+    <li class="self-crumb">dispose method</li>
   </ol>
-  <div class="self-name">init</div>
+  <div class="self-name">dispose</div>
   <form class="search navbar-right" role="search">
     <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
   </form>
@@ -52,7 +52,7 @@
     data-above-sidebar="vietmap_automotive_flutter_method_channel&#47;MethodChannelVietmapAutomotiveFlutter-class-sidebar.html"
     data-below-sidebar="">
     <div>
-<h1><span class="kind-method">init</span> method 
+<h1><span class="kind-method">dispose</span> method 
 </h1></div>
 
     <section class="multi-line-signature">
@@ -63,20 +63,15 @@
     </ol>
   </div>
 <span class="returntype">void</span>
-<span class="name ">init</span>(<wbr>{<ol class="parameter-list"> <li><span class="parameter" id="init-param-onMapReady"><span class="type-annotation">void</span> <span class="parameter-name">onMapReady</span>()?, </span></li>
-<li><span class="parameter" id="init-param-onMapClick"><span class="type-annotation">void</span> <span class="parameter-name">onMapClick</span>(<ol class="parameter-list single-line"> <li><span class="parameter" id="param-latitude"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span> <span class="parameter-name">latitude</span>, </span></li>
-<li><span class="parameter" id="param-longitude"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span> <span class="parameter-name">longitude</span></span></li>
-</ol>)?, </span></li>
-<li><span class="parameter" id="init-param-onMapRendered"><span class="type-annotation">void</span> <span class="parameter-name">onMapRendered</span>()?, </span></li>
-<li><span class="parameter" id="init-param-onStyleLoaded"><span class="type-annotation">void</span> <span class="parameter-name">onStyleLoaded</span>()?, </span></li>
-</ol>})
+<span class="name ">dispose</span>(<wbr>)
 
       <div class="features"><span class="feature">override</span></div>
 
     </section>
     
 <section class="desc markdown">
-  <p>Set up the method channel and listen for method calls from the native platform.</p>
+  <p>Disposes the stream controllers and removes the listeners.
+This method should be called when the plugin object is no longer needed.</p>
 </section>
 
 
@@ -84,63 +79,10 @@
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">@override
-void init({
-  void Function()? onMapReady,
-  void Function(double latitude, double longitude)? onMapClick,
-  void Function()? onMapRendered,
-  void Function()? onStyleLoaded,
-}) {
-  &#47;&#47;&#47; Set the listeners for the given events.
-  if (onMapReady != null) {
-    _onMapReadyListeners.add(onMapReady);
-  }
-  if (onMapClick != null) {
-    _onMapClickListeners.add(onMapClick);
-  }
-  if (onMapRendered != null) {
-    _onMapRenderedListeners.add(onMapRendered);
-  }
-  if (onStyleLoaded != null) {
-    _onStyleLoadedListeners.add(onStyleLoaded);
-  }
-
-  _eventSubscription = eventChannel.receiveBroadcastStream().listen(
-    (event) {
-      final eventData = Map&lt;String, dynamic&gt;.from(event);
-      final type = eventData[&#39;type&#39;] as String?;
-      final data = Map&lt;dynamic, dynamic&gt;.from(eventData[&#39;data&#39;] as Map);
-
-      switch (type) {
-        case Events.onMapClick:
-          final latitude = data[&#39;lat&#39;] as double;
-          final longitude = data[&#39;lng&#39;] as double;
-          for (var listener in _onMapClickListeners) {
-            listener(latitude, longitude);
-          }
-          break;
-        case Events.onMapReady:
-          for (var listener in _onMapReadyListeners) {
-            listener();
-          }
-          break;
-        case Events.onMapRendered:
-          for (var listener in _onMapRenderedListeners) {
-            listener();
-          }
-          break;
-        case Events.onStyleLoaded:
-          for (var listener in _onStyleLoadedListeners) {
-            listener();
-          }
-          break;
-        default:
-          debugPrint(&#39;Method not implemented&#39;);
-      }
-    },
-    onError: (error) {
-      debugPrint(&#39;Error in event stream: $error&#39;);
-    },
-  );
+void dispose() {
+  _eventSubscription?.cancel();
+  _eventSubscription = null;
+  super.dispose();
 }</code></pre>
 </section>
 
@@ -157,7 +99,7 @@ void init({
     <li><a href="../../index.html">vietmap_automotive_flutter</a></li>
     <li><a href="../../vietmap_automotive_flutter_method_channel/">vietmap_automotive_flutter_method_channel</a></li>
     <li><a href="../../vietmap_automotive_flutter_method_channel/MethodChannelVietmapAutomotiveFlutter-class.html">MethodChannelVietmapAutomotiveFlutter</a></li>
-    <li class="self-crumb">init method</li>
+    <li class="self-crumb">dispose method</li>
 </ol>
 
     <h5>MethodChannelVietmapAutomotiveFlutter class</h5>
